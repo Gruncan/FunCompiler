@@ -10,7 +10,7 @@
             </pattern>
         </extension>
         <method v="2">
-            <option name="RunConfigurationTask" enabled="true" run_configuration_name="Antlr Calc Compile"
+            <option name="RunConfigurationTask" enabled="true" run_configuration_name="Antlr Fun Compile"
                     run_configuration_type="JarApplication"/>
             <option name="Make" enabled="true"/>
         </method>
