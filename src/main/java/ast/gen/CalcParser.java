@@ -1,4 +1,4 @@
-// Generated from .\src\main\java\ast\Calc.g4 by ANTLR 4.9.1
+// Generated from ../Calc.g4 by ANTLR 4.9.1
 
 package ast;
 
@@ -18,7 +18,7 @@ import java.util.List;
 public class CalcParser extends Parser {
     public static final int
             PUT = 1, SET = 2, ASSN = 3, PLUS = 4, MINUS = 5, TIMES = 6, LPAR = 7, RPAR = 8, ID = 9,
-            NUM = 10, EOL = 11, SPACE = 12;
+            NUM = 10, EOL = 11, SPACE = 12, COMMENT = 13;
     public static final int
             RULE_prog = 0, RULE_com = 1, RULE_expr = 2, RULE_prim = 3, RULE_var = 4;
     public static final String[] ruleNames = makeRuleNames();
@@ -28,7 +28,7 @@ public class CalcParser extends Parser {
     @Deprecated
     public static final String[] tokenNames;
     public static final String _serializedATN =
-            "\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\16\63\4\2\t\2\4\3" +
+            "\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\17\63\4\2\t\2\4\3" +
                     "\t\3\4\4\t\4\4\5\t\5\4\6\t\6\3\2\7\2\16\n\2\f\2\16\2\21\13\2\3\2\3\2\3" +
                     "\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\5\3\37\n\3\3\4\3\4\3\4\7\4$\n\4" +
                     "\f\4\16\4\'\13\4\3\5\3\5\3\5\3\5\3\5\3\5\5\5/\n\5\3\6\3\6\3\6\2\2\7\2" +
@@ -96,7 +96,7 @@ public class CalcParser extends Parser {
     private static String[] makeSymbolicNames() {
         return new String[]{
                 null, "PUT", "SET", "ASSN", "PLUS", "MINUS", "TIMES", "LPAR", "RPAR",
-                "ID", "NUM", "EOL", "SPACE"
+                "ID", "NUM", "EOL", "SPACE", "COMMENT"
         };
     }
 

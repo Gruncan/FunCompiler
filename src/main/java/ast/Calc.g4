@@ -52,3 +52,4 @@ NUM	:	'0'..'9'+ ;
 EOL	:	'\r'? '\n' ;
 
 SPACE	:	(' ' | '\t')+  -> skip ;
+COMMENT : '//' ~[\n\r]* -> skip ;

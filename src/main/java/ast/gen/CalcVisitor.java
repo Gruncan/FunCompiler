@@ -1,4 +1,4 @@
-// Generated from .\src\main\java\ast\Calc.g4 by ANTLR 4.9.1
+// Generated from ../Calc.g4 by ANTLR 4.9.1
 
 package ast;
 
