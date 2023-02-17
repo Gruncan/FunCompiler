@@ -1,7 +1,0 @@
-set c = 8
-set e = 7
-put c*2
-put e*8
-set mm = (c*2) + (e*8)
-put mm
-// a this is a atest

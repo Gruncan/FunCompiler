@@ -1,9 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-    <configuration default="false" name="Antlr Calc Compile" type="JarApplication">
-        <option name="JAR_PATH" value="$PROJECT_DIR$/antlr.jar"/>
-        <option name="PROGRAM_PARAMETERS" value="-no-listener -visitor ../Calc.g4"/>
-        <option name="WORKING_DIRECTORY" value="C:\Development\Java\FunCompiler\src\main\java\ast\gen"/>
-        <option name="ALTERNATIVE_JRE_PATH"/>
-        <method v="2"/>
-    </configuration>
-</component>
