@@ -38,16 +38,12 @@ public class ExecVisitor extends CalcBaseVisitor<Integer> {
 		int numTerms = prims.size();
 		for (int i = 1; i < numTerms; i++) {
 			switch (ops.get(i - 1).getType()) {
-				case CalcParser.PLUS:
-					value = value + visit(prims.get(i));
-					break;
-				case CalcParser.MINUS:
-					value = value - visit(prims.get(i));
-					break;
-				case CalcParser.TIMES:
-					value = value * visit(prims.get(i));
-					break;
-				default:
+				case CalcParser.PLUS -> value = value + visit(prims.get(i));
+				case CalcParser.MINUS -> value = value - visit(prims.get(i));
+				case CalcParser.TIMES -> value = value * visit(prims.get(i));
+				case CalcParser.DIV -> value = value / visit(prims.get(i));
+				default -> {
+				}
 			}
 		}
 		return value;
