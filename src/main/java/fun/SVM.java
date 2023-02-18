@@ -1,17 +1,13 @@
-//////////////////////////////////////////////////////////////
-//
-// Representation and interpretation of FunVM code.
-//
-// Based on a previous version developed by
-// David Watt and Simon Gay (University of Glasgow).
-//
-//////////////////////////////////////////////////////////////
-
 package fun;
 
 import java.io.PrintStream;
 import java.util.Scanner;
 
+/**
+ * Representation and interpretation of FunVM code.
+ * Based on a previous version developed by
+ * David Watt and Simon Gay (University of Glasgow).
+ */
 public class SVM {
 
     // Each SVM object is a simple virtual machine.
@@ -89,10 +85,10 @@ public class SVM {
             HALTED = 1,
             FAILED = 2;
     public static final int         // offsets of IO routines
-            READOFFSET = 32766,
-            WRITEOFFSET = 32767,
-            IOBASE = 32766;
-    private static final String[] mnemonic = {
+            READ_OFF_SET = 32766,
+            WRITE_OFF_SET = 32767,
+            IO_BASE = 32766;
+    private static final String[] MNEMONIC = {
             "LOADG   ", "STOREG  ",
             "LOADL   ", "STOREL  ",
             "LOADC   ", "???     ",
@@ -105,7 +101,7 @@ public class SVM {
             "JUMPF   ", "JUMPT   ",
             "CALL    ", "RETURN  ",
             "COPYARG "};
-    private static final int[] bytes = {
+    private static final int[] BYTES = {
             3, 3,
             3, 3,
             3, 1,
@@ -121,8 +117,8 @@ public class SVM {
 
 
     // MACHINE STATE
-    private static Scanner in = new Scanner(System.in);
-    private static PrintStream out = System.out;
+    private static final Scanner in = new Scanner(System.in);
+    private static final PrintStream out = System.out;
     protected byte[] code;     // code store
     protected int cl;          // code limit
     protected int pc;          // program counter
@@ -138,8 +134,8 @@ public class SVM {
     protected byte status;
 
     public SVM() {
-        code = new byte[32768];
-        cl = 0;
+        this.code = new byte[32768];
+        this.cl = 0;
     }
 
     public void interpret(boolean tracing) {
@@ -147,232 +143,190 @@ public class SVM {
         // in the code store.
         // If tracing is true, print each instruction
         // as it is executed.
-        data = new int[32768];
-        pc = 0;
-        sp = 0;
-        fp = 0;
-        status = RUNNING;
+        this.data = new int[32768];
+        this.pc = 0;
+        this.sp = 0;
+        this.fp = 0;
+        this.status = RUNNING;
         do {
-            if (tracing)
-                out.println(showInstruction(pc));
-            byte opcode = code[pc++];
+            if (tracing) out.println(showInstruction(pc));
+            byte opcode = this.code[this.pc++];
             switch (opcode) {
-                case LOADG: {
-                    int d =  // addr of global variable
-                            code[pc++] << 8 |
-                                    (code[pc++] & 0xFF);
-                    data[sp++] = data[d];
-                    break;
+                case LOADG -> {
+                    // addr of global variable
+                    int d = this.code[this.pc++] << 8 | (this.code[this.pc++] & 0xFF);
+                    this.data[this.sp++] = this.data[d];
                 }
-                case STOREG: {
-                    int d =  // addr of global variable
-                            code[pc++] << 8 |
-                                    (code[pc++] & 0xFF);
-                    data[d] = data[--sp];
-                    break;
+                case STOREG -> {
+                    // addr of global variable
+                    int d = this.code[this.pc++] << 8 | (this.code[this.pc++] & 0xFF);
+                    this.data[d] = this.data[--this.sp];
                 }
-                case LOADL: {
-                    int d =  // addr of local variable
-                            code[pc++] << 8 |
-                                    (code[pc++] & 0xFF);
-                    data[sp++] = data[fp + d];
-                    break;
+                case LOADL -> {
+                    // addr of local variable
+                    int d = this.code[this.pc++] << 8 | (this.code[this.pc++] & 0xFF);
+                    this.data[this.sp++] = this.data[fp + d];
                 }
-                case STOREL: {
-                    int d =  // addr of local variable
-                            code[pc++] << 8 |
-                                    (code[pc++] & 0xFF);
-                    data[fp + d] = data[--sp];
-                    break;
+                case STOREL -> {
+                    // addr of local variable
+                    int d = this.code[this.pc++] << 8 | (this.code[this.pc++] & 0xFF);
+                    this.data[fp + d] = this.data[--this.sp];
                 }
-                case LOADC: {
-                    int w =  // value of literal
-                            code[pc++] << 8 |
-                                    (code[pc++] & 0xFF);
-                    data[sp++] = w;
-                    break;
+                case LOADC -> {
+                    // addr of local variable
+                    int w = this.code[this.pc++] << 8 | (this.code[this.pc++] & 0xFF);
+                    this.data[this.sp++] = w;
                 }
-                case ADD: {
-                    int w2 = data[--sp];
-                    int w1 = data[--sp];
-                    data[sp++] = w1 + w2;
-                    break;
+                case ADD -> {
+                    int w2 = this.data[--this.sp];
+                    int w1 = this.data[--this.sp];
+                    this.data[this.sp++] = w1 + w2;
                 }
-                case SUB: {
-                    int w2 = data[--sp];
-                    int w1 = data[--sp];
-                    data[sp++] = w1 - w2;
-                    break;
+                case SUB -> {
+                    int w2 = this.data[--this.sp];
+                    int w1 = this.data[--this.sp];
+                    this.data[this.sp++] = w1 - w2;
                 }
-                case MUL: {
-                    int w2 = data[--sp];
-                    int w1 = data[--sp];
-                    data[sp++] = w1 * w2;
-                    break;
+                case MUL -> {
+                    int w2 = this.data[--this.sp];
+                    int w1 = this.data[--this.sp];
+                    this.data[this.sp++] = w1 * w2;
                 }
-                case DIV: {
-                    int w2 = data[--sp];
-                    int w1 = data[--sp];
-                    data[sp++] = w1 / w2;
-                    break;
+                case DIV -> {
+                    int w2 = this.data[--this.sp];
+                    int w1 = this.data[--this.sp];
+                    this.data[this.sp++] = w1 / w2;
                 }
-                case CMPEQ: {
-                    int w2 = data[--sp];
-                    int w1 = data[--sp];
-                    data[sp++] = (w1 == w2 ? 1 : 0);
-                    break;
+                case CMPEQ -> {
+                    int w2 = this.data[--this.sp];
+                    int w1 = this.data[--this.sp];
+                    this.data[this.sp++] = (w1 == w2 ? 1 : 0);
                 }
-                case CMPLT: {
-                    int w2 = data[--sp];
-                    int w1 = data[--sp];
-                    data[sp++] = (w1 < w2 ? 1 : 0);
-                    break;
+                case CMPLT -> {
+                    int w2 = this.data[--this.sp];
+                    int w1 = this.data[--this.sp];
+                    this.data[this.sp++] = (w1 < w2 ? 1 : 0);
                 }
-                case CMPGT: {
-                    int w2 = data[--sp];
-                    int w1 = data[--sp];
-                    data[sp++] = (w1 > w2 ? 1 : 0);
-                    break;
+                case CMPGT -> {
+                    int w2 = this.data[--this.sp];
+                    int w1 = this.data[--this.sp];
+                    this.data[this.sp++] = (w1 > w2 ? 1 : 0);
                 }
-                case INV: {
-                    int w = data[--sp];
-                    data[sp++] = (w == 0 ? 1 : 0);
-                    break;
+                case INV -> {
+                    int w = this.data[--this.sp];
+                    this.data[this.sp++] = (w == 0 ? 1 : 0);
                 }
-                case INC: {
-                    int w = data[--sp];
-                    data[sp++] = w + 1;
-                    break;
+                case INC -> {
+                    int w = this.data[--this.sp];
+                    this.data[this.sp++] = w + 1;
                 }
-                case HALT: {
-                    status = HALTED;
-                    break;
+                case HALT -> {
+                    this.status = HALTED;
                 }
-                case JUMP: {
-                    int c =  // target of jump
-                            code[pc++] << 8 |
-                                    (code[pc++] & 0xFF);
-                    pc = c;
-                    break;
+                case JUMP -> {
+                    // target of jump
+                    this.pc = this.code[this.pc++] << 8 | (this.code[this.pc++] & 0xFF);
                 }
-                case JUMPF: {
-                    int c =  // target of jump
-                            code[pc++] << 8 |
-                                    (code[pc++] & 0xFF);
-                    int w = data[--sp];
-                    if (w == 0)
-                        pc = c;
-                    break;
+                case JUMPF -> {
+                    // target of jump
+                    int c = this.code[this.pc++] << 8 | (this.code[this.pc++] & 0xFF);
+                    int w = this.data[--this.sp];
+
+                    if (w == 0) this.pc = c;
                 }
-                case JUMPT: {
-                    int c =  // target of jump
-                            code[pc++] << 8 |
-                                    (code[pc++] & 0xFF);
-                    int w = data[--sp];
-                    if (w != 0)
-                        pc = c;
-                    break;
+                case JUMPT -> {
+                    // target of jump
+                    int c = this.code[this.pc++] << 8 | (this.code[this.pc++] & 0xFF);
+                    int w = this.data[--this.sp];
+
+                    if (w != 0) this.pc = c;
                 }
-                case CALL: {
-                    int c =  // address of callee
-                            code[pc++] << 8 |
-                                    (code[pc++] & 0xFF);
-                    if (c >= IOBASE) {
+                case CALL -> {
+                    // address of callee
+                    int c = this.code[this.pc++] << 8 | (this.code[this.pc++] & 0xFF);
+
+                    if (c >= IO_BASE) {
                         callIO(c);
                         break;
                     }
-                    data[sp++] = fp;  // dyn link
-                    data[sp++] = pc;  // return addr
-                    fp = sp - 2;
-                    pc = c;
-                    break;
+                    this.data[this.sp++] = this.fp;  // dyn link
+                    this.data[this.sp++] = this.pc;  // return addr
+                    this.fp = this.sp - 2;
+                    this.pc = c;
                 }
-
-                case RETURN: {
-                    int r = code[pc++];  // result size
-                    int dl = data[fp];   // dyn link
-                    int ra = data[fp + 1]; // return addr
+                case RETURN -> {
+                    int r = this.code[this.pc++];  // result size
+                    int dl = this.data[this.fp];   // dyn link
+                    int ra = this.data[this.fp + 1]; // return addr
                     // Shift result down to top of
                     // caller's frame:
-                    for (int i = 0; i < r; i++)
-                        data[fp + i] = data[sp - r + i];
-                    sp = fp + r;
-                    fp = dl;
-                    pc = ra;
-                    break;
+                    for (int i = 0; i < r; i++) this.data[this.fp + i] = this.data[this.sp - r + i];
+
+                    this.sp = this.fp + r;
+                    this.fp = dl;
+                    this.pc = ra;
                 }
-                case COPYARG: {
-                    int s = code[pc++];  // args size
-                    int dl = data[fp];   // dyn link
-                    int ra = data[fp + 1]; // return addr
+                case COPYARG -> {
+                    int s = this.code[this.pc++];  // args size
+                    int dl = this.data[this.fp];   // dyn link
+                    int ra = this.data[this.fp + 1]; // return addr
                     // Shift arguments up by 2 words,
-                    // to make room for link data:
-                    for (int i = 0; i < s; i++)
-                        data[fp - i + 1] = data[fp - i - 1];
-                    // Move link data under arguments:
-                    fp -= s;
-                    data[fp] = dl;
-                    data[fp + 1] = ra;
-                    break;
+                    // to make room for link this.data:
+                    for (int i = 0; i < s; i++) this.data[this.fp - i + 1] = this.data[this.fp - i - 1];
+
+                    // Move link this.data under arguments:
+                    this.fp -= s;
+                    this.data[this.fp] = dl;
+                    this.data[this.fp + 1] = ra;
                 }
-                default: {
-                    out.println("Illegal instruction"
-                            + opcode);
-                    status = FAILED;
+                default -> {
+                    out.println("Illegal instruction" + opcode);
+                    this.status = FAILED;
                 }
             }
-        } while (status == RUNNING);
+        } while (this.status == RUNNING);
     }
 
     private void callIO(int c) {
         // Execute a call to an IO routine.
         switch (c) {
-            case READOFFSET: {
+            case READ_OFF_SET -> {
                 out.print("? ");
                 int w = in.nextInt();
-                data[sp++] = w;
-                break;
+                this.data[this.sp++] = w;
             }
-            case WRITEOFFSET: {
-                int w = data[--sp];
+            case WRITE_OFF_SET -> {
+                int w = this.data[--this.sp];
                 out.println(w);
-                break;
             }
         }
     }
 
 
     // CODE DISPLAY
-
     public String showCode() {
         // Return a textual representation of all the code.
-        String assembly = "";
-        for (int c = 0; c < cl; ) {
-            assembly += showInstruction(c) + "\n";
-            c += bytes[code[c]];
+        StringBuilder assembly = new StringBuilder();
+        for (int c = 0; c < this.cl; ) {
+            assembly.append(showInstruction(c)).append("\n");
+            c += BYTES[this.code[c]];
         }
-        return assembly;
+        return assembly.toString();
     }
 
     private String showInstruction(int c) {
         // Return a textual representation of the instruction
         // at offset c in the code store.
-        byte opcode = code[c++];
-        String line =
-                String.format("%6d: %s", c - 1, mnemonic[opcode]);
-        switch (bytes[opcode]) {
-            case 1:
-                break;
-            case 2: {
-                byte operand = code[c++];
+        byte opcode = this.code[c++];
+        String line = String.format("%6d: %s", c - 1, MNEMONIC[opcode]);
+        switch (BYTES[opcode]) {
+            case 2 -> {
+                byte operand = this.code[c++];
                 line += operand;
-                break;
             }
-            case 3: {
-                int operand =
-                        code[c++] << 8 | (code[c++] & 0xFF);
+            case 3 -> {
+                int operand = this.code[c++] << 8 | (this.code[c++] & 0xFF);
                 line += operand;
-                break;
             }
         }
         return line;
@@ -380,54 +334,52 @@ public class SVM {
 
 
     // STACK DISPLAY
-
     private String showStack() {
         // Return a textual representation of the stack contents.
-        String show = "";
-        int dl = fp;
-        for (int a = sp - 1; a >= 0; a--) {
-            show +=
-                    String.format("%6d: %6d\n", a, data[a]);
+        StringBuilder show = new StringBuilder();
+        int dl = this.fp;
+        for (int a = this.sp - 1; a >= 0; a--) {
+            show.append(String.format("%6d: %6d\n", a, this.data[a]));
+
             if (a == dl) {
-                show += "        ------\n";
-                dl = data[a];
+                show.append("        ------\n");
+                dl = this.data[a];
             }
         }
-        return show;
+        return show.toString();
     }
 
 
     // CODE EMISSION
-
     public void emit1(byte opcode) {
         // Add a 1 byte instruction to the code.
-        code[cl++] = opcode;
+        this.code[this.cl++] = opcode;
     }
 
     public void emit11(byte opcode,
                        int operand) {
         // Add a 1+1 byte instruction to the code.
-        code[cl++] = opcode;
-        code[cl++] = (byte) operand;
+        this.code[this.cl++] = opcode;
+        this.code[this.cl++] = (byte) operand;
     }
 
     public void emit12(byte opcode,
                        int operand) {
         // Add a 1+2 byte instruction to the code.
-        code[cl++] = opcode;
-        code[cl++] = (byte) (operand >> 8);
-        code[cl++] = (byte) (operand & 0xFF);
+        this.code[this.cl++] = opcode;
+        this.code[this.cl++] = (byte) (operand >> 8);
+        this.code[this.cl++] = (byte) (operand & 0xFF);
     }
 
     public void patch12(int addr, int operand) {
         // Patch an operand into a 1+2 byte instruction.
-        code[addr + 1] = (byte) (operand >> 8);
-        code[addr + 2] = (byte) (operand & 0xFF);
+        this.code[addr + 1] = (byte) (operand >> 8);
+        this.code[addr + 2] = (byte) (operand & 0xFF);
     }
 
     public int currentOffset() {
         // Return the offset of the next instruction to be added.
-        return cl;
+        return this.cl;
     }
 
 }

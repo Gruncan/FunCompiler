@@ -1,12 +1,3 @@
-//////////////////////////////////////////////////////////////
-//
-// A visitor for code generation for Fun.
-//
-// Based on a previous version developed by
-// David Watt and Simon Gay (University of Glasgow).
-//
-//////////////////////////////////////////////////////////////
-
 package fun;
 
 import ast.FunParser;
@@ -15,27 +6,27 @@ import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 import java.util.List;
 
+/**
+ * A visitor for code generation for Fun.
+ * Based on a previous version developed by
+ * David Watt and Simon Gay (University of Glasgow).
+ */
 public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements FunVisitor<Void> {
 
-	private SVM obj = new SVM();
-
-	private int globalvaraddr = 0;
-	private int localvaraddr = 0;
+	private final SVM obj = new SVM();
+	private final SymbolTable<Address> addrTable = new SymbolTable<>();
+	private int globalVarAddr = 0;
 	private int currentLocale = Address.GLOBAL;
-
-	private SymbolTable<Address> addrTable =
-			new SymbolTable<Address>();
+	private int localVarAddr = 0;
 
 	private void predefine() {
 		// Add predefined procedures to the address table.
-		addrTable.put("read",
-				new Address(SVM.READOFFSET, Address.CODE));
-		addrTable.put("write",
-				new Address(SVM.WRITEOFFSET, Address.CODE));
+		this.addrTable.put("read", new Address(SVM.READ_OFF_SET, Address.CODE));
+		this.addrTable.put("write", new Address(SVM.WRITE_OFF_SET, Address.CODE));
 	}
 
 	public SVM getSVM() {
-		return obj;
+		return this.obj;
 	}
 
 	/**
@@ -45,19 +36,23 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitProg(FunParser.ProgContext ctx) {
-		predefine();
+		this.predefine();
 		List<FunParser.Var_declContext> var_decl = ctx.var_decl();
-		for (FunParser.Var_declContext vd : var_decl)
-			visit(vd);
-		int calladdr = obj.currentOffset();
-		obj.emit12(SVM.CALL, 0);
-		obj.emit1(SVM.HALT);
+
+		for (FunParser.Var_declContext vd : var_decl) super.visit(vd);
+
+		int callAddr = this.obj.currentOffset();
+		this.obj.emit12(SVM.CALL, 0);
+		this.obj.emit1(SVM.HALT);
+
 		List<FunParser.Proc_declContext> proc_decl = ctx.proc_decl();
-		for (FunParser.Proc_declContext pd : proc_decl)
-			visit(pd);
-		int mainaddr = addrTable.get("main").offset;
-		obj.patch12(calladdr, mainaddr);
+
+		for (FunParser.Proc_declContext pd : proc_decl) super.visit(pd);
+
+		int mainAddr = this.addrTable.get("main").offset;
+		this.obj.patch12(callAddr, mainAddr);
 		return null;
 	}
 
@@ -68,24 +63,26 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitProc(FunParser.ProcContext ctx) {
 		String id = ctx.ID().getText();
-		Address procaddr = new Address(obj.currentOffset(), Address.CODE);
-		addrTable.put(id, procaddr);
-		addrTable.enterLocalScope();
-		currentLocale = Address.LOCAL;
-		localvaraddr = 2;
+		Address procaddr = new Address(this.obj.currentOffset(), Address.CODE);
+		this.addrTable.put(id, procaddr);
+		this.addrTable.enterLocalScope();
+		this.currentLocale = Address.LOCAL;
+		this.localVarAddr = 2;
+
 		// ... allows 2 words for link data
 		FunParser.Formal_declContext fd = ctx.formal_decl();
-		if (fd != null)
-			visit(fd);
+		if (fd != null) super.visit(fd);
+
 		List<FunParser.Var_declContext> var_decl = ctx.var_decl();
-		for (FunParser.Var_declContext vd : var_decl)
-			visit(vd);
-		visit(ctx.seq_com());
-		obj.emit11(SVM.RETURN, 0);
-		addrTable.exitLocalScope();
-		currentLocale = Address.GLOBAL;
+		for (FunParser.Var_declContext vd : var_decl) super.visit(vd);
+
+		super.visit(ctx.seq_com());
+		this.obj.emit11(SVM.RETURN, 0);
+		this.addrTable.exitLocalScope();
+		this.currentLocale = Address.GLOBAL;
 		return null;
 	}
 
@@ -96,25 +93,27 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitFunc(FunParser.FuncContext ctx) {
 		String id = ctx.ID().getText();
-		Address procaddr = new Address(obj.currentOffset(), Address.CODE);
-		addrTable.put(id, procaddr);
-		addrTable.enterLocalScope();
-		currentLocale = Address.LOCAL;
-		localvaraddr = 2;
+		Address procAddr = new Address(this.obj.currentOffset(), Address.CODE);
+		this.addrTable.put(id, procAddr);
+		this.addrTable.enterLocalScope();
+		this.currentLocale = Address.LOCAL;
+		this.localVarAddr = 2;
+
 		// ... allows 2 words for link data
 		FunParser.Formal_declContext fd = ctx.formal_decl();
-		if (fd != null)
-			visit(fd);
+		if (fd != null) super.visit(fd);
+
 		List<FunParser.Var_declContext> var_decl = ctx.var_decl();
-		for (FunParser.Var_declContext vd : var_decl)
-			visit(vd);
-		visit(ctx.seq_com());
-		visit(ctx.expr());
-		obj.emit11(SVM.RETURN, 1);
-		addrTable.exitLocalScope();
-		currentLocale = Address.GLOBAL;
+		for (FunParser.Var_declContext vd : var_decl) super.visit(vd);
+
+		super.visit(ctx.seq_com());
+		super.visit(ctx.expr());
+		this.obj.emit11(SVM.RETURN, 1);
+		this.addrTable.exitLocalScope();
+		this.currentLocale = Address.GLOBAL;
 		return null;
 	}
 
@@ -125,12 +124,13 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitFormal(FunParser.FormalContext ctx) {
 		FunParser.TypeContext tc = ctx.type();
 		if (tc != null) {
 			String id = ctx.ID().getText();
-			addrTable.put(id, new Address(localvaraddr++, Address.LOCAL));
-			obj.emit11(SVM.COPYARG, 1);
+			this.addrTable.put(id, new Address(this.localVarAddr++, Address.LOCAL));
+			this.obj.emit11(SVM.COPYARG, 1);
 		}
 		return null;
 	}
@@ -142,17 +142,13 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitVar(FunParser.VarContext ctx) {
-		visit(ctx.expr());
+		super.visit(ctx.expr());
 		String id = ctx.ID().getText();
-		switch (currentLocale) {
-			case Address.LOCAL:
-				addrTable.put(id, new Address(
-						localvaraddr++, Address.LOCAL));
-				break;
-			case Address.GLOBAL:
-				addrTable.put(id, new Address(
-						globalvaraddr++, Address.GLOBAL));
+		switch (this.currentLocale) {
+			case Address.LOCAL -> this.addrTable.put(id, new Address(this.localVarAddr++, Address.LOCAL));
+			case Address.GLOBAL -> this.addrTable.put(id, new Address(this.globalVarAddr++, Address.GLOBAL));
 		}
 		return null;
 	}
@@ -164,6 +160,7 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitBool(FunParser.BoolContext ctx) {
 		return null;
 	}
@@ -175,6 +172,7 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitInt(FunParser.IntContext ctx) {
 		return null;
 	}
@@ -186,16 +184,14 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitAssn(FunParser.AssnContext ctx) {
-		visit(ctx.expr());
+		super.visit(ctx.expr());
 		String id = ctx.ID().getText();
-		Address varaddr = addrTable.get(id);
-		switch (varaddr.locale) {
-			case Address.GLOBAL:
-				obj.emit12(SVM.STOREG, varaddr.offset);
-				break;
-			case Address.LOCAL:
-				obj.emit12(SVM.STOREL, varaddr.offset);
+		Address varAddr = this.addrTable.get(id);
+		switch (varAddr.locale) {
+			case Address.GLOBAL -> this.obj.emit12(SVM.STOREG, varAddr.offset);
+			case Address.LOCAL -> this.obj.emit12(SVM.STOREL, varAddr.offset);
 		}
 		return null;
 	}
@@ -207,12 +203,14 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitProccall(FunParser.ProccallContext ctx) {
-		visit(ctx.actual());
+		super.visit(ctx.actual());
 		String id = ctx.ID().getText();
-		Address procaddr = addrTable.get(id);
+		Address procAddr = this.addrTable.get(id);
+
 		// Assume procaddr.locale == CODE.
-		obj.emit12(SVM.CALL, procaddr.offset);
+		this.obj.emit12(SVM.CALL, procAddr.offset);
 		return null;
 	}
 
@@ -223,23 +221,28 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitIf(FunParser.IfContext ctx) {
-		visit(ctx.expr());
-		int condaddr = obj.currentOffset();
-		obj.emit12(SVM.JUMPF, 0);
+		super.visit(ctx.expr());
+		int condAddr = this.obj.currentOffset();
+		this.obj.emit12(SVM.JUMPF, 0);
+
 		if (ctx.c2 == null) { // IF without ELSE
-			visit(ctx.c1);
-			int exitaddr = obj.currentOffset();
-			obj.patch12(condaddr, exitaddr);
+			super.visit(ctx.c1);
+			int exitAddr = this.obj.currentOffset();
+			this.obj.patch12(condAddr, exitAddr);
+
 		} else {                // IF ... ELSE
-			visit(ctx.c1);
-			int jumpaddr = obj.currentOffset();
-			obj.emit12(SVM.JUMP, 0);
-			int elseaddr = obj.currentOffset();
-			obj.patch12(condaddr, elseaddr);
-			visit(ctx.c2);
-			int exitaddr = obj.currentOffset();
-			obj.patch12(jumpaddr, exitaddr);
+			super.visit(ctx.c1);
+			int jumpAddr = this.obj.currentOffset();
+			this.obj.emit12(SVM.JUMP, 0);
+
+			int elseAddr = this.obj.currentOffset();
+			this.obj.patch12(condAddr, elseAddr);
+			super.visit(ctx.c2);
+
+			int exitAddr = this.obj.currentOffset();
+			this.obj.patch12(jumpAddr, exitAddr);
 		}
 		return null;
 	}
@@ -251,15 +254,19 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitWhile(FunParser.WhileContext ctx) {
-		int startaddr = obj.currentOffset();
-		visit(ctx.expr());
-		int condaddr = obj.currentOffset();
-		obj.emit12(SVM.JUMPF, 0);
-		visit(ctx.seq_com());
-		obj.emit12(SVM.JUMP, startaddr);
-		int exitaddr = obj.currentOffset();
-		obj.patch12(condaddr, exitaddr);
+		int startAddr = this.obj.currentOffset();
+		super.visit(ctx.expr());
+
+		int condAddr = this.obj.currentOffset();
+		this.obj.emit12(SVM.JUMPF, 0);
+		super.visit(ctx.seq_com());
+
+		this.obj.emit12(SVM.JUMP, startAddr);
+		int exitAddr = this.obj.currentOffset();
+		this.obj.patch12(condAddr, exitAddr);
+
 		return null;
 	}
 
@@ -270,8 +277,9 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitSeq(FunParser.SeqContext ctx) {
-		visitChildren(ctx);
+		this.visitChildren(ctx);
 		return null;
 	}
 
@@ -281,20 +289,15 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitExpr(FunParser.ExprContext ctx) {
-		visit(ctx.e1);
+		super.visit(ctx.e1);
 		if (ctx.e2 != null) {
-			visit(ctx.e2);
+			super.visit(ctx.e2);
 			switch (ctx.op.getType()) {
-				case FunParser.EQ:
-					obj.emit1(SVM.CMPEQ);
-					break;
-				case FunParser.LT:
-					obj.emit1(SVM.CMPLT);
-					break;
-				case FunParser.GT:
-					obj.emit1(SVM.CMPGT);
-					break;
+				case FunParser.EQ -> this.obj.emit1(SVM.CMPEQ);
+				case FunParser.LT -> this.obj.emit1(SVM.CMPLT);
+				case FunParser.GT -> this.obj.emit1(SVM.CMPGT);
 			}
 		}
 		return null;
@@ -306,23 +309,16 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitSec_expr(FunParser.Sec_exprContext ctx) {
-		visit(ctx.e1);
+		super.visit(ctx.e1);
 		if (ctx.e2 != null) {
-			visit(ctx.e2);
+			super.visit(ctx.e2);
 			switch (ctx.op.getType()) {
-				case FunParser.PLUS:
-					obj.emit1(SVM.ADD);
-					break;
-				case FunParser.MINUS:
-					obj.emit1(SVM.SUB);
-					break;
-				case FunParser.TIMES:
-					obj.emit1(SVM.MUL);
-					break;
-				case FunParser.DIV:
-					obj.emit1(SVM.DIV);
-					break;
+				case FunParser.PLUS -> this.obj.emit1(SVM.ADD);
+				case FunParser.MINUS -> this.obj.emit1(SVM.SUB);
+				case FunParser.TIMES -> this.obj.emit1(SVM.MUL);
+				case FunParser.DIV -> this.obj.emit1(SVM.DIV);
 			}
 		}
 		return null;
@@ -335,8 +331,9 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitFalse(FunParser.FalseContext ctx) {
-		obj.emit12(SVM.LOADC, 0);
+		this.obj.emit12(SVM.LOADC, 0);
 		return null;
 	}
 
@@ -347,8 +344,9 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitTrue(FunParser.TrueContext ctx) {
-		obj.emit12(SVM.LOADC, 1);
+		this.obj.emit12(SVM.LOADC, 1);
 		return null;
 	}
 
@@ -359,9 +357,10 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitNum(FunParser.NumContext ctx) {
 		int value = Integer.parseInt(ctx.NUM().getText());
-		obj.emit12(SVM.LOADC, value);
+		this.obj.emit12(SVM.LOADC, value);
 		return null;
 	}
 
@@ -372,15 +371,13 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitId(FunParser.IdContext ctx) {
 		String id = ctx.ID().getText();
-		Address varaddr = addrTable.get(id);
-		switch (varaddr.locale) {
-			case Address.GLOBAL:
-				obj.emit12(SVM.LOADG, varaddr.offset);
-				break;
-			case Address.LOCAL:
-				obj.emit12(SVM.LOADL, varaddr.offset);
+		Address varAddr = this.addrTable.get(id);
+		switch (varAddr.locale) {
+			case Address.GLOBAL -> this.obj.emit12(SVM.LOADG, varAddr.offset);
+			case Address.LOCAL -> this.obj.emit12(SVM.LOADL, varAddr.offset);
 		}
 		return null;
 	}
@@ -392,12 +389,13 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitFunccall(FunParser.FunccallContext ctx) {
-		visit(ctx.actual());
+		super.visit(ctx.actual());
 		String id = ctx.ID().getText();
-		Address funcaddr = addrTable.get(id);
-		// Assume that funcaddr.locale == CODE.
-		obj.emit12(SVM.CALL, funcaddr.offset);
+		Address funcAddr = this.addrTable.get(id);
+		// Assume that funcAddr.locale == CODE.
+		this.obj.emit12(SVM.CALL, funcAddr.offset);
 		return null;
 	}
 
@@ -408,9 +406,10 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitNot(FunParser.NotContext ctx) {
-		visit(ctx.prim_expr());
-		obj.emit1(SVM.INV);
+		super.visit(ctx.prim_expr());
+		this.obj.emit1(SVM.INV);
 		return null;
 	}
 
@@ -421,8 +420,9 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitParens(FunParser.ParensContext ctx) {
-		visit(ctx.expr());
+		super.visit(ctx.expr());
 		return null;
 	}
 
@@ -432,11 +432,12 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
+	@Override
 	public Void visitActual(FunParser.ActualContext ctx) {
 		FunParser.ExprContext ec = ctx.expr();
-		if (ec != null) {
-			visit(ec);
-		}
+
+		if (ec != null) super.visit(ec);
+
 		return null;
 	}
 

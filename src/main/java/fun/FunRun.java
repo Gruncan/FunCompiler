@@ -1,12 +1,3 @@
-//////////////////////////////////////////////////////////////
-//
-// Driver for the Fun compiler and SVM interpreter.
-//
-// Based on a previous version developed by
-// David Watt and Simon Gay (University of Glasgow).
-//
-//////////////////////////////////////////////////////////////
-
 package fun;
 
 import ast.FunLexer;
@@ -17,11 +8,16 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.PrintStream;
 
+/**
+ * Driver for the Fun compiler and SVM interpreter.
+ * Based on a previous version developed by
+ * David Watt and Simon Gay (University of Glasgow).
+ */
 public class FunRun {
 
-	private static boolean tracing = false;
+	private static final boolean tracing = false;
 
-	private static PrintStream out = System.out;
+	private static final PrintStream out = System.out;
 
 	public static void main(String[] args) {
 		// Compile a Fun source program to SVM code,
@@ -29,11 +25,10 @@ public class FunRun {
 		// The source file name must be given as the
 		// first program argument.
 		try {
-			if (args.length == 0)
-				throw new FunException();
-			SVM objprog = compile(args[0]);
+			if (args.length == 0) throw new FunException();
+			SVM objProg = compile(args[0]);
 			out.println("Interpretation ...");
-			objprog.interpret(tracing);
+			objProg.interpret(tracing);
 		} catch (FunException x) {
 			out.printf("Compilation failed %s\n", x.toString());
 		} catch (Exception x) {
@@ -43,49 +38,47 @@ public class FunRun {
 
 	private static SVM compile(String filename) throws Exception {
 		// Compile a Fun source program to SVM code.
-		FunLexer lexer = new FunLexer(
-				CharStreams.fromFileName(filename));
-		CommonTokenStream tokens =
-				new CommonTokenStream(lexer);
+		FunLexer lexer = new FunLexer(CharStreams.fromFileName(filename));
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+
 		ParseTree tree = syntacticAnalyse(tokens);
 		contextualAnalyse(tree, tokens);
-		SVM objprog = codeGenerate(tree);
-		return objprog;
+
+		return codeGenerate(tree);
 	}
 
-	private static ParseTree syntacticAnalyse(CommonTokenStream tokens)
-			throws Exception {
+	private static ParseTree syntacticAnalyse(CommonTokenStream tokens) throws Exception {
 		// Perform syntactic analysis of a Fun source program.
 		// Print any error messages.
 		// Return a syntax tree representation of the Fun program.
 		out.println();
 		out.println("Syntactic analysis ...");
+
 		FunParser parser = new FunParser(tokens);
 		ParseTree tree = parser.program();
+
 		int errors = parser.getNumberOfSyntaxErrors();
 		out.println(errors + " syntactic errors");
-		if (errors > 0)
-			throw new FunException();
+
+		if (errors > 0) throw new FunException();
+
 		return tree;
 	}
 
-	private static void contextualAnalyse(ParseTree tree, CommonTokenStream tokens)
-			throws Exception {
+	private static void contextualAnalyse(ParseTree tree, CommonTokenStream tokens) throws Exception {
 		// Perform contextual analysis of a Fun program represented by a syntax tree.
 		// Print any error messages.
 		out.println("Contextual analysis ...");
-		FunCheckerVisitor checker =
-				new FunCheckerVisitor(tokens);
+		FunCheckerVisitor checker = new FunCheckerVisitor(tokens);
 		checker.visit(tree);
+
 		int errors = checker.getNumberOfContextualErrors();
 		out.println(errors + " scope/type errors");
 		out.println();
-		if (errors > 0)
-			throw new FunException();
+		if (errors > 0) throw new FunException();
 	}
 
-	private static SVM codeGenerate(ParseTree tree)
-			throws Exception {
+	private static SVM codeGenerate(ParseTree tree) {
 		// Perform code generation of a Fun program,
 		// represented by a syntax tree, emitting SVM code.
 		// Also print the object code.
@@ -93,13 +86,13 @@ public class FunRun {
 		FunEncoderVisitor encoder =
 				new FunEncoderVisitor();
 		encoder.visit(tree);
-		SVM objectprog = encoder.getSVM();
+		SVM objectProg = encoder.getSVM();
+
 		out.println("Object code:");
-		out.println(objectprog.showCode());
-		return objectprog;
+		out.println(objectProg.showCode());
+
+		return objectProg;
 	}
 
-	private static class FunException extends Exception {
-	}
 
 }

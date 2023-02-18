@@ -20,8 +20,8 @@ public class Address {
     public int locale;  // CODE, GLOBAL, or LOCAL
 
     public Address(int off, int loc) {
-        offset = off;
-        locale = loc;
+        this.offset = off;
+        this.locale = loc;
     }
 
 }
