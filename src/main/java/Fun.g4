@@ -1,9 +1,16 @@
+//////////////////////////////////////////////////////////////
+//
+// Specification of the Fun grammar.
+//
+//////////////////////////////////////////////////////////////
+
+
 grammar Fun;
 
 // This specifies the Fun grammar, defining the syntax of Fun.
 
 @header{
-    package ast;
+	package ast;
 }
 
 //////// Programs
@@ -17,21 +24,17 @@ program
 
 proc_decl
 	:	PROC ID
-		  LPAR formal_decl_seq? RPAR COLON
+		  LPAR formal_decl RPAR COLON
 		  var_decl* seq_com DOT   # proc
 
 	|	FUNC type ID
-		  LPAR formal_decl_seq? RPAR COLON
+		  LPAR formal_decl RPAR COLON
 		  var_decl* seq_com
 		  RETURN expr DOT         # func
 	;
 
-formal_decl_seq
-	:	formal_decl (COMMA formal_decl)* # formalseq
-	;
-
 formal_decl
-	:	type ID                # formal
+	:	(type ID)?                # formal
 	;
 
 var_decl
@@ -48,7 +51,7 @@ type
 
 com
 	:	ID ASSN expr              # assn
-	|	ID LPAR actual_seq? RPAR       # proccall
+	|	ID LPAR actual RPAR       # proccall
 							 
 	|	IF expr COLON c1=seq_com
 		  ( DOT              
@@ -81,16 +84,14 @@ prim_expr
 	|	TRUE                   # true
 	|	NUM                    # num
 	|	ID                     # id
-	|	ID LPAR actual_seq? RPAR    # funccall
+	|	ID LPAR actual RPAR    # funccall
 	|	NOT prim_expr          # not
 	|	LPAR expr RPAR         # parens
 	;
 
-actual_seq
-	:  expr (COMMA expr)*  # actualseq
-	;
-
-
+actual
+    :   expr?
+    ;
 
 
 //////// Lexicon
@@ -99,36 +100,35 @@ BOOL	:	'bool' ;
 ELSE	:	'else' ;
 FALSE	:	'false' ;
 FUNC	:	'func' ;
-IF      :	'if' ;
-INT     :	'int' ;
+IF		:	'if' ;
+INT		:	'int' ;
 PROC	:	'proc' ;
-RETURN  :	'return' ;
+RETURN 	:	'return' ;
 TRUE	:	'true' ;
 WHILE	:	'while' ;
 
-EQ      :	'==' ;
-LT      :	'<' ;
-GT      :	'>' ;
+EQ		:	'==' ;
+LT		:	'<' ;
+GT		:	'>' ;
 PLUS	:	'+' ;
 MINUS	:	'-' ;
 TIMES	:	'*' ;
-DIV     :	'/' ;
-NOT     :	'not' ;
+DIV		:	'/' ;
+NOT		:	'not' ;
 
 ASSN	:	'=' ;
 
 LPAR	:	'(' ;
 RPAR	:	')' ;
 COLON	:	':' ;
-DOT     :	'.' ;
-COMMA	:	',' ;
+DOT		:	'.' ;
 
-NUM	:	DIGIT+ ;
+NUM		:	DIGIT+ ;
 
-ID	:	LETTER (LETTER | DIGIT)* ;
+ID		:	LETTER (LETTER | DIGIT)* ;
 
 SPACE	:	(' ' | '\t')+   -> skip ;
-EOL     :	'\r'? '\n'          -> skip ;
+EOL		:	'\r'? '\n'          -> skip ;
 COMMENT :	'#' ~('\r' | '\n')* '\r'? '\n'  -> skip ;
 
 fragment LETTER : 'a'..'z' | 'A'..'Z' ;
