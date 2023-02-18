@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="FunParser" type="Application" factoryName="Application">
+        <option name="MAIN_CLASS_NAME" value="fun.FunParse"/>
+        <module name="FunCompiler"/>
+        <option name="PROGRAM_PARAMETERS" value="src/test/java/fun/multiple.fun"/>
+        <extension name="coverage">
+            <pattern>
+                <option name="PATTERN" value="calc.*"/>
+                <option name="ENABLED" value="true"/>
+            </pattern>
+        </extension>
+        <method v="2">
+            <option name="RunConfigurationTask" enabled="true" run_configuration_name="Antlr Fun Compile"
+                    run_configuration_type="JarApplication"/>
+            <option name="Make" enabled="true"/>
+        </method>
+    </configuration>
+</component>
