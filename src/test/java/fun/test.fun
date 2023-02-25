@@ -1,8 +1,8 @@
 # Test while-commands.
 
 proc main ():
-	int n = 2
-	repeat-until n*n:
-		write(n*n)
-		n = n+1 .
+    int n = 0
+	repeat-until 10:
+		write(n)
+	.
 .

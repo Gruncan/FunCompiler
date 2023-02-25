@@ -15,7 +15,7 @@ import java.io.PrintStream;
  */
 public class FunRun {
 
-    private static final boolean tracing = false;
+    private static final boolean tracing = true;
 
     private static final PrintStream out = System.out;
 
@@ -83,8 +83,7 @@ public class FunRun {
         // represented by a syntax tree, emitting SVM code.
         // Also print the object code.
         out.println("Code generation ...");
-        FunEncoderVisitor encoder =
-                new FunEncoderVisitor();
+        FunEncoderVisitor encoder = new FunEncoderVisitor();
         encoder.visit(tree);
         SVM objectProg = encoder.getSVM();
 

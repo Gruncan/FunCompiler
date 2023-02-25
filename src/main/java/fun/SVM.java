@@ -334,7 +334,7 @@ public class SVM {
 
 
     // STACK DISPLAY
-    private String showStack() {
+    public String showStack() {
         // Return a textual representation of the stack contents.
         StringBuilder show = new StringBuilder();
         int dl = this.fp;

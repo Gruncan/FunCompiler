@@ -341,6 +341,9 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
 
     @Override
     public Type visitRepeat_until(FunParser.Repeat_untilContext ctx) {
+        Type t = super.visit(ctx.sec_expr());
+        super.visit(ctx.seq_com());
+        this.checkType(Type.INT, t, ctx);
         return null;
     }
 
