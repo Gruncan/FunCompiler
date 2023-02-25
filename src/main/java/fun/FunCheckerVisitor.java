@@ -339,6 +339,11 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
         return null;
     }
 
+    @Override
+    public Type visitRepeat_until(FunParser.Repeat_untilContext ctx) {
+        return null;
+    }
+
     /**
      * Visit a parse tree produced by the {@code seq}
      * labeled alternative in {@link FunParser#seq_com}.

@@ -270,6 +270,11 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         return null;
     }
 
+    @Override
+    public Void visitRepeat_until(FunParser.Repeat_untilContext ctx) {
+        return null;
+    }
+
     /**
      * Visit a parse tree produced by the {@code seq}
      * labeled alternative in {@link FunParser#seq_com}.

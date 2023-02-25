@@ -2,11 +2,11 @@
     <configuration default="false" name="FunRun" type="Application" factoryName="Application">
         <option name="MAIN_CLASS_NAME" value="fun.FunRun"/>
         <module name="FunCompiler"/>
-        <option name="PROGRAM_PARAMETERS" value="src/test/java/fun/assign.fun"/>
+        <option name="PROGRAM_PARAMETERS" value="src/test/java/fun/test.fun"/>
         <extension name="coverage">
             <pattern>
                 <option name="PATTERN" value="calc.*"/>
-                <option name="ENABLED" value="true"/>
+                <option name="ENABLED" value="false"/>
             </pattern>
         </extension>
         <method v="2">

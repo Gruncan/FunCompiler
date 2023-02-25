@@ -39,3 +39,4 @@ build/
 
 ### Intellji ###
 .idea
+.run

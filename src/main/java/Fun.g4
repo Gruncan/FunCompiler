@@ -60,6 +60,8 @@ com
 
 	|	WHILE expr COLON          
 		  seq_com DOT             # while
+    |   REPEAT_UNTIL sec_expr COLON
+          seq_com DOT             # repeat_until
 	;
 
 seq_com
@@ -106,6 +108,7 @@ PROC	:	'proc' ;
 RETURN 	:	'return' ;
 TRUE	:	'true' ;
 WHILE	:	'while' ;
+REPEAT_UNTIL : 'repeat-until';
 
 EQ		:	'==' ;
 LT		:	'<' ;

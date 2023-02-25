@@ -61,8 +61,7 @@ public class FunCheck {
         return tree;
     }
 
-    private static void contextualAnalyse(ParseTree tree, CommonTokenStream tokens)
-            throws Exception {
+    private static void contextualAnalyse(ParseTree tree, CommonTokenStream tokens) throws Exception {
         // Perform contextual analysis of a Fun program,
         // represented by a syntax tree.
         // Print any error messages.
