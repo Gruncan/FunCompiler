@@ -60,14 +60,30 @@ com
 
 	|	WHILE expr COLON          
 		  seq_com DOT             # while
+
     |   REPEAT_UNTIL sec_expr COLON
           seq_com DOT             # repeat_until
+
+    |   SWITCH sec_expr COLON
+          sw_case+
+          sw_default
+          DOT                   # switch
 	;
 
 seq_com
 	:	com*                      # seq
 	;
 
+sw_case
+    : CASE sec_expr COLON
+            seq_com DOT        # case
+    ;
+
+sw_default
+    :
+       DEFAULT COLON
+            seq_com DOT     # default
+    ;
 
 //////// Expressions
 
@@ -109,6 +125,9 @@ RETURN 	:	'return' ;
 TRUE	:	'true' ;
 WHILE	:	'while' ;
 REPEAT_UNTIL : 'repeat-until';
+SWITCH : 'switch';
+CASE : 'case';
+DEFAULT: 'default';
 
 EQ		:	'==' ;
 LT		:	'<' ;

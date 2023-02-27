@@ -1,4 +1,4 @@
-# Test while-commands.
+
 
 proc main ():
     int n = 0

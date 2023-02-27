@@ -347,6 +347,35 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
         return null;
     }
 
+    @Override
+    public Type visitSwitch(FunParser.SwitchContext ctx) {
+        Type t = super.visit(ctx.sec_expr());
+        this.checkType(Type.INT, t, ctx);
+        for (FunParser.Sw_caseContext sw_case : ctx.sw_case()) {
+            super.visit(sw_case);
+        }
+
+        super.visit(ctx.sw_default());
+
+        return null;
+
+    }
+
+    @Override
+    public Type visitCase(FunParser.CaseContext ctx) {
+        Type t = super.visit(ctx.sec_expr());
+        this.checkType(Type.INT, t, ctx);
+        super.visit(ctx.seq_com());
+        return null;
+
+    }
+
+    @Override
+    public Type visitDefault(FunParser.DefaultContext ctx) {
+        super.visit(ctx.seq_com());
+        return null;
+    }
+
     /**
      * Visit a parse tree produced by the {@code seq}
      * labeled alternative in {@link FunParser#seq_com}.
@@ -359,6 +388,7 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
         super.visitChildren(ctx);
         return null;
     }
+
 
     /**
      * Visit a parse tree produced by {@link FunParser#expr}.

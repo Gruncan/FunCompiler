@@ -275,14 +275,13 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         // Evaluating expression and storing in i
         super.visit(ctx.sec_expr());
         String id = "i";
-        this.addrTable.put(id, new Address(this.localVarAddr++, Address.LOCAL));
+        this.addrTable.put(id, new Address(this.globalVarAddr++, Address.GLOBAL));
         Address iAddr = this.addrTable.get("i");
         int startAddr = this.obj.currentOffset();
 
         this.obj.emit12(SVM.STOREL, iAddr.offset);
-        this.obj.emit12(SVM.LOADC, 0);
         this.obj.emit12(SVM.LOADL, iAddr.offset);
-
+        this.obj.emit12(SVM.LOADC, 0);
 
         this.obj.emit1(SVM.CMPLT);
         int condAddr = this.obj.currentOffset();
@@ -300,7 +299,21 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         int exitAddr = this.obj.currentOffset();
         this.obj.patch12(condAddr, exitAddr);
 
+        return null;
+    }
 
+    @Override
+    public Void visitSwitch(FunParser.SwitchContext ctx) {
+        return null;
+    }
+
+    @Override
+    public Void visitCase(FunParser.CaseContext ctx) {
+        return null;
+    }
+
+    @Override
+    public Void visitDefault(FunParser.DefaultContext ctx) {
         return null;
     }
 
