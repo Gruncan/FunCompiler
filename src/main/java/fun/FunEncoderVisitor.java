@@ -279,9 +279,10 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         Address iAddr = this.addrTable.get("i");
         int startAddr = this.obj.currentOffset();
 
-        this.obj.emit12(SVM.STOREL, iAddr.offset);
-        this.obj.emit12(SVM.LOADL, iAddr.offset);
+        this.obj.emit12(SVM.STOREG, iAddr.offset);
         this.obj.emit12(SVM.LOADC, 0);
+        this.obj.emit12(SVM.LOADG, iAddr.offset);
+
 
         this.obj.emit1(SVM.CMPLT);
         int condAddr = this.obj.currentOffset();
@@ -289,15 +290,15 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 
         super.visit(ctx.seq_com());
 
-        this.obj.emit12(SVM.LOADL, iAddr.offset);
+        this.obj.emit12(SVM.LOADG, iAddr.offset);
         this.obj.emit12(SVM.LOADC, 1);
         this.obj.emit1(SVM.SUB);
-        this.obj.emit12(SVM.STOREL, iAddr.offset);
 
         this.obj.emit12(SVM.JUMP, startAddr);
 
         int exitAddr = this.obj.currentOffset();
         this.obj.patch12(condAddr, exitAddr);
+
 
         return null;
     }

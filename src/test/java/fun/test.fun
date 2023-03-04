@@ -1,8 +1,9 @@
 
 
 proc main ():
-    int n = 0
+    int n = 1
 	repeat-until 10:
-		write(n)
+		n = n * 3
 	.
+	write(n)
 .
