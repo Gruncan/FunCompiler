@@ -48,6 +48,16 @@ public class SymbolTable<T> {
             return false;
     }
 
+    public boolean remove(String id) {
+        T r;
+        if (this.locals != null && this.locals.get(id) != null)
+            r = this.locals.remove(id);
+        else
+            r = this.globals.remove(id);
+
+        return r != null;
+    }
+
     public T get(String id) {
         // Retrieve the attribute corresponding to id in this
         // symbol table. If id occurs in both local and global

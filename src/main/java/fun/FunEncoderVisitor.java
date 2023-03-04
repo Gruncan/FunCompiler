@@ -274,9 +274,9 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
     public Void visitRepeat_until(FunParser.Repeat_untilContext ctx) {
         // Evaluating expression and storing in i
         super.visit(ctx.sec_expr());
-        String id = "i";
+        String id = "_i"; // Impossible to override other variables since illegal naming
         this.addrTable.put(id, new Address(this.globalVarAddr++, Address.GLOBAL));
-        Address iAddr = this.addrTable.get("i");
+        Address iAddr = this.addrTable.get(id);
         int startAddr = this.obj.currentOffset();
 
         this.obj.emit12(SVM.STOREG, iAddr.offset);
@@ -299,17 +299,45 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         int exitAddr = this.obj.currentOffset();
         this.obj.patch12(condAddr, exitAddr);
 
+        // removes index variable
+        this.addrTable.remove(id);
 
         return null;
     }
 
     @Override
     public Void visitSwitch(FunParser.SwitchContext ctx) {
+        super.visit(ctx.sec_expr());
+        String id = "_i"; // Impossible to override other variables since illegal naming
+        this.addrTable.put(id, new Address(this.globalVarAddr++, Address.GLOBAL));
+        Address iAddr = this.addrTable.get(id);
+        int startAddr = this.obj.currentOffset();
+        this.obj.emit12(SVM.STOREG, iAddr.offset);
+
+        for (FunParser.Sw_caseContext sw : ctx.sw_case()) {
+            super.visit(sw);
+        }
+
+        super.visit(ctx.sw_default());
         return null;
     }
 
     @Override
     public Void visitCase(FunParser.CaseContext ctx) {
+        super.visit(ctx.sec_expr());
+
+        String id = "_i"; // Impossible to override other variables since illegal naming
+        Address iAddr = this.addrTable.get(id);
+
+        this.obj.emit12(SVM.LOADG, iAddr.offset);
+        this.obj.emit1(SVM.CMPEQ);
+        int condAddr = this.obj.currentOffset();
+        this.obj.emit12(SVM.JUMPF, 0); // To be patched
+
+        super.visit(ctx.seq_com());
+        int exitAddr = this.obj.currentOffset();
+        this.obj.patch12(condAddr, exitAddr); // Patching to next case or default
+
         return null;
     }
 
