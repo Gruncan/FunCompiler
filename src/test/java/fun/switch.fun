@@ -2,12 +2,15 @@
 
 proc main ():
     int n = 5
+    int v = 0
     switch n:
-        case 5:
-            write(5)
+        case 6:
+            v = v + 1
         .
         default:
-           write(6)
+           v = 0
        .
     .
+
+   write(v)
 .

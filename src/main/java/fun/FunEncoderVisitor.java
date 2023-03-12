@@ -4,6 +4,7 @@ import ast.FunParser;
 import ast.FunVisitor;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -308,24 +309,35 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
     @Override
     public Void visitSwitch(FunParser.SwitchContext ctx) {
         super.visit(ctx.sec_expr());
+        // TODO Check its not already in use, with things like loop etc
         String id = "_i"; // Impossible to override other variables since illegal naming
         this.addrTable.put(id, new Address(this.globalVarAddr++, Address.GLOBAL));
         Address iAddr = this.addrTable.get(id);
         int startAddr = this.obj.currentOffset();
         this.obj.emit12(SVM.STOREG, iAddr.offset);
 
+        List<Integer> patches = new ArrayList<>();
         for (FunParser.Sw_caseContext sw : ctx.sw_case()) {
             super.visit(sw);
+            patches.add(this.obj.currentOffset() - 3);
+        }
+        super.visit(ctx.sw_default());
+
+        int endAddr = this.obj.currentOffset();
+
+
+        for (int patchLoc : patches) {
+            this.obj.patch12(patchLoc, endAddr);
         }
 
-        super.visit(ctx.sw_default());
+
         return null;
     }
 
     @Override
     public Void visitCase(FunParser.CaseContext ctx) {
-        super.visit(ctx.sec_expr());
-
+        super.visit(ctx.sec_expr()); // Pushes on to stack
+        // TODO Check its not already in use, with things like loop etc
         String id = "_i"; // Impossible to override other variables since illegal naming
         Address iAddr = this.addrTable.get(id);
 
@@ -335,6 +347,10 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         this.obj.emit12(SVM.JUMPF, 0); // To be patched
 
         super.visit(ctx.seq_com());
+
+
+        this.obj.emit12(SVM.JUMP, 0); // After finished jump to end
+
         int exitAddr = this.obj.currentOffset();
         this.obj.patch12(condAddr, exitAddr); // Patching to next case or default
 
@@ -343,6 +359,7 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 
     @Override
     public Void visitDefault(FunParser.DefaultContext ctx) {
+        super.visit(ctx.seq_com());
         return null;
     }
 

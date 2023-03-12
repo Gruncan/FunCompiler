@@ -48,6 +48,7 @@ public class SymbolTable<T> {
             return false;
     }
 
+    // My code
     public boolean remove(String id) {
         T r;
         if (this.locals != null && this.locals.get(id) != null)
