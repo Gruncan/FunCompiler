@@ -349,10 +349,11 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
 
     @Override
     public Type visitSwitch(FunParser.SwitchContext ctx) {
-        Type t = super.visit(ctx.sec_expr());
-        this.checkType(Type.INT, t, ctx);
+        Type t = super.visit(ctx.expr());
         for (FunParser.Sw_caseContext sw_case : ctx.sw_case()) {
-            super.visit(sw_case);
+            Type type = super.visit(sw_case);
+            System.out.println(type);
+            this.checkType(t, type, ctx);
         }
 
         super.visit(ctx.sw_default());
@@ -363,11 +364,9 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
 
     @Override
     public Type visitCase(FunParser.CaseContext ctx) {
-        Type t = super.visit(ctx.sec_expr());
-        this.checkType(Type.INT, t, ctx);
+        Type t = super.visit(ctx.expr());
         super.visit(ctx.seq_com());
-        return null;
-
+        return t;
     }
 
     @Override

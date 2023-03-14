@@ -307,7 +307,7 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 
     @Override
     public Void visitSwitch(FunParser.SwitchContext ctx) {
-        super.visit(ctx.sec_expr());
+        super.visit(ctx.expr());
         // TODO Check its not already in use, with things like loop etc
         String id = "_i"; // Impossible to override other variables since illegal naming
         this.addrTable.put(id, new Address(this.globalVarAddr++, Address.GLOBAL));
@@ -334,7 +334,7 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 
     @Override
     public Void visitCase(FunParser.CaseContext ctx) {
-        super.visit(ctx.sec_expr()); // Pushes on to stack
+        super.visit(ctx.expr()); // Pushes on to stack
         // TODO Check its not already in use, with things like loop etc
         String id = "_i"; // Impossible to override other variables since illegal naming
         Address iAddr = this.addrTable.get(id);

@@ -64,7 +64,7 @@ com
     |   REPEAT_UNTIL sec_expr COLON
           seq_com DOT             # repeat_until
 
-    |   SWITCH sec_expr COLON
+    |   SWITCH expr COLON
           sw_case+
           sw_default
           DOT                   # switch
@@ -75,7 +75,7 @@ seq_com
 	;
 
 sw_case
-    : CASE sec_expr COLON
+    : CASE expr COLON
             seq_com DOT        # case
     ;
 
