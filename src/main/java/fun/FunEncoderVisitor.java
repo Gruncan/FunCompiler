@@ -4,7 +4,6 @@ import ast.FunParser;
 import ast.FunVisitor;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -313,13 +312,12 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         String id = "_i"; // Impossible to override other variables since illegal naming
         this.addrTable.put(id, new Address(this.globalVarAddr++, Address.GLOBAL));
         Address iAddr = this.addrTable.get(id);
-        int startAddr = this.obj.currentOffset();
         this.obj.emit12(SVM.STOREG, iAddr.offset);
 
-        List<Integer> patches = new ArrayList<>();
-        for (FunParser.Sw_caseContext sw : ctx.sw_case()) {
-            super.visit(sw);
-            patches.add(this.obj.currentOffset() - 3);
+        int[] patches = new int[ctx.sw_case().size()];
+        for (int i = 0; i < patches.length; i++) {
+            super.visit(ctx.sw_case(i));
+            patches[i] = this.obj.currentOffset() - 3;
         }
         super.visit(ctx.sw_default());
 
@@ -347,7 +345,6 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         this.obj.emit12(SVM.JUMPF, 0); // To be patched
 
         super.visit(ctx.seq_com());
-
 
         this.obj.emit12(SVM.JUMP, 0); // After finished jump to end
 
