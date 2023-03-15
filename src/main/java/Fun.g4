@@ -64,7 +64,7 @@ com
     |   REPEAT_UNTIL sec_expr COLON
           seq_com DOT             # repeat_until
 
-    |   SWITCH expr COLON
+    |   SWITCH literal COLON
           sw_case+
           sw_default
           DOT                   # switch
@@ -75,7 +75,7 @@ seq_com
 	;
 
 sw_case
-    : CASE expr COLON
+    : CASE (literal | range) COLON
             seq_com DOT        # case
     ;
 
@@ -97,10 +97,18 @@ sec_expr
 		  ( op=(PLUS | MINUS | TIMES | DIV) e2=sec_expr )?
 	;
 
+literal
+    :   FALSE                  # false
+    |   TRUE                   # true
+    |   NUM                    # num
+    ;
+
+range
+    :   NUM DOT DOT NUM
+    ;
+
 prim_expr
-	:	FALSE                  # false        
-	|	TRUE                   # true
-	|	NUM                    # num
+    :   literal                # literalr
 	|	ID                     # id
 	|	ID LPAR actual RPAR    # funccall
 	|	NOT prim_expr          # not
