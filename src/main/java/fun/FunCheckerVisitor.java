@@ -364,14 +364,27 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
 
     @Override
     public Type visitCase(FunParser.CaseContext ctx) {
-        Type t = super.visit(ctx.expr());
+//        Type t = super.visit(ctx.expr());
         super.visit(ctx.seq_com());
-        return t;
+//        return t;
+        return null;
     }
 
     @Override
     public Type visitDefault(FunParser.DefaultContext ctx) {
         super.visit(ctx.seq_com());
+        return null;
+    }
+
+    @Override
+    public Type visitRange(FunParser.RangeContext ctx) {
+        super.visitChildren(ctx);
+        return null;
+    }
+
+    @Override
+    public Type visitLiteral(FunParser.LiteralContext ctx) {
+        super.visitChildren(ctx);
         return null;
     }
 

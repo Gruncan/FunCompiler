@@ -75,7 +75,7 @@ seq_com
 	;
 
 sw_case
-    : CASE (literal | range) COLON
+    : CASE (lit | range) COLON
             seq_com DOT        # case
     ;
 
@@ -97,18 +97,18 @@ sec_expr
 		  ( op=(PLUS | MINUS | TIMES | DIV) e2=sec_expr )?
 	;
 
-literal
+lit
     :   FALSE                  # false
     |   TRUE                   # true
     |   NUM                    # num
     ;
 
 range
-    :   NUM DOT DOT NUM
+    :   n1=NUM DOT DOT n2=NUM
     ;
 
 prim_expr
-    :   literal                # literalr
+    :   lit                    # literal
 	|	ID                     # id
 	|	ID LPAR actual RPAR    # funccall
 	|	NOT prim_expr          # not
