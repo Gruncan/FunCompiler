@@ -104,7 +104,7 @@ lit
     ;
 
 range
-    :   n1=NUM DOT DOT n2=NUM
+    :   n1=lit DOT DOT n2=lit
     ;
 
 prim_expr

@@ -7,6 +7,8 @@ proc main ():
         case true:
             v = v + 1
         .
+        case false:
+        .
         default:
            v = 8
        .

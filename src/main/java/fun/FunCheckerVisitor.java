@@ -352,7 +352,6 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
         Type t = super.visit(ctx.expr());
         for (FunParser.Sw_caseContext sw_case : ctx.sw_case()) {
             Type type = super.visit(sw_case);
-            System.out.println(type);
             this.checkType(t, type, ctx);
         }
 
@@ -364,10 +363,13 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
 
     @Override
     public Type visitCase(FunParser.CaseContext ctx) {
-//        Type t = super.visit(ctx.expr());
-        super.visit(ctx.seq_com());
-//        return t;
-        return null;
+        FunParser.RangeContext range = ctx.range();
+        FunParser.LitContext lit = ctx.lit();
+        if (range == null)
+            return super.visit(lit);
+        else
+            return super.visit(range);
+
     }
 
     @Override
@@ -378,14 +380,16 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
 
     @Override
     public Type visitRange(FunParser.RangeContext ctx) {
-        super.visitChildren(ctx);
-        return null;
+        Type t1 = super.visit(ctx.n1);
+        Type t2 = super.visit(ctx.n2);
+        this.checkType(Type.INT, t1, ctx);
+        this.checkType(Type.INT, t2, ctx);
+        return Type.INT;
     }
 
     @Override
     public Type visitLiteral(FunParser.LiteralContext ctx) {
-        super.visitChildren(ctx);
-        return null;
+        return super.visitChildren(ctx);
     }
 
     /**
