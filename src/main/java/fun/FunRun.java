@@ -15,7 +15,7 @@ import java.io.PrintStream;
  */
 public class FunRun {
 
-    private static final boolean tracing = false;
+    private static final boolean tracing = true;
 
     private static final PrintStream out = System.out;
 

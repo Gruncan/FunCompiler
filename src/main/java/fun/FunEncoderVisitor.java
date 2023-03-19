@@ -4,6 +4,7 @@ import ast.FunParser;
 import ast.FunVisitor;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -335,20 +336,31 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
     @Override
     public Void visitCase(FunParser.CaseContext ctx) {
         // TODO handle option or the 2
-        FunParser.LitContext litContext = ctx.lit();
-        FunParser.RangeContext rangeContext = ctx.range();
-        System.out.println(litContext);
-        System.out.println(rangeContext);
-
-        super.visit(ctx.lit()); // Pushes on to stack
 
         // TODO Check its not already in use, with things like loop etc
         String id = "_i"; // Impossible to override other variables since illegal naming
         Address iAddr = this.addrTable.get(id);
 
-        this.obj.emit12(SVM.LOADG, iAddr.offset);
-        this.obj.emit1(SVM.CMPEQ);
-        int condAddr = this.obj.currentOffset();
+        FunParser.LitContext litContext = ctx.lit();
+        FunParser.RangeContext rangeContext = ctx.range();
+
+        List<Integer> conditions = new ArrayList<>();
+        if (rangeContext == null) {
+            super.visit(litContext); // Pushes on to stack
+            this.obj.emit12(SVM.LOADG, iAddr.offset);
+            this.obj.emit1(SVM.CMPEQ);
+        } else {
+            super.visit(rangeContext); // Pushes n1-1 then n2+1 to stack
+            this.obj.emit12(SVM.LOADG, iAddr.offset);
+            this.obj.emit1(SVM.CMPGT);
+            conditions.add(this.obj.currentOffset());
+            this.obj.emit12(SVM.JUMPF, 0); // to be patched
+
+            this.obj.emit12(SVM.LOADG, iAddr.offset);
+            this.obj.emit1(SVM.CMPLT);
+        }
+
+        conditions.add(this.obj.currentOffset());
         this.obj.emit12(SVM.JUMPF, 0); // To be patched
 
         super.visit(ctx.seq_com());
@@ -356,8 +368,9 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         this.obj.emit12(SVM.JUMP, 0); // After finished jump to end
 
         int exitAddr = this.obj.currentOffset();
-        this.obj.patch12(condAddr, exitAddr); // Patching to next case or default
-
+        for (int condAddr : conditions) {
+            this.obj.patch12(condAddr, exitAddr); // Patching to next case or default
+        }
         return null;
     }
 
@@ -369,6 +382,12 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 
     @Override
     public Void visitRange(FunParser.RangeContext ctx) {
+        super.visit(ctx.n1);
+        this.obj.emit12(SVM.LOADC, 1);
+        this.obj.emit1(SVM.SUB);
+        super.visit(ctx.n2);
+        this.obj.emit12(SVM.LOADC, 1);
+        this.obj.emit1(SVM.ADD);
         return null;
     }
 

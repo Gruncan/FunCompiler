@@ -1,13 +1,14 @@
 
 
 proc main ():
-    bool n = true
+    int n = 122
     int v = 0
     switch n:
-        case true:
+        case 5..9:
             v = v + 1
         .
-        case false:
+        case 122:
+            v = 68
         .
         default:
            v = 8
