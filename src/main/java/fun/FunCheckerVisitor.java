@@ -354,9 +354,7 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
             Type type = super.visit(sw_case);
             this.checkType(t, type, ctx);
         }
-
         super.visit(ctx.sw_default());
-
         return null;
 
     }

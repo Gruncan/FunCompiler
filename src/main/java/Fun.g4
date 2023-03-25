@@ -70,10 +70,6 @@ com
           DOT                   # switch
 	;
 
-seq_com
-	:	com*                      # seq
-	;
-
 sw_case
     : CASE (lit | range) COLON
             seq_com DOT        # case
@@ -84,6 +80,10 @@ sw_default
        DEFAULT COLON
             seq_com DOT     # default
     ;
+
+seq_com
+	:	com*                      # seq
+	;
 
 //////// Expressions
 

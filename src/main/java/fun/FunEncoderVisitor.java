@@ -284,7 +284,6 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         this.obj.emit12(SVM.LOADC, 0);
         this.obj.emit12(SVM.LOADG, iAddr.offset);
 
-
         this.obj.emit1(SVM.CMPLT);
         int condAddr = this.obj.currentOffset();
         this.obj.emit12(SVM.JUMPF, 0); // To be patched
@@ -324,11 +323,9 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
 
         int endAddr = this.obj.currentOffset();
 
-
         for (int patchLoc : patches) {
             this.obj.patch12(patchLoc, endAddr);
         }
-
 
         return null;
     }
