@@ -1,0 +1,32 @@
+     0: CALL    4
+     3: HALT
+     4: LOADC   1
+     7: LOADC   0
+    10: LOADC   1
+    13: LOADL   2
+    16: STOREG  0
+    19: LOADC   1
+    22: LOADG   0
+    25: CMPEQ
+    26: JUMPF   75
+    29: LOADL   4           # load c
+    32: STOREG  1           # store in global
+    35: LOADC   0           # case false load false
+    38: LOADG   1           # load c
+    41: CMPEQ
+    42: JUMPF   60
+    45: LOADC   0           # write 0
+    48: CALL    32767
+    51: LOADC   3           # v = 3
+    54: STOREL  3
+    57: JUMP    72          # jump to finish
+    60: LOADC   1
+    63: CALL    32767
+    66: LOADC   7           # v = 7
+    69: STOREL  3
+    72: JUMP    81
+    75: LOADC   8
+    78: STOREL  3
+    81: LOADL   3
+    84: CALL    32767
+    87: RETURN  0

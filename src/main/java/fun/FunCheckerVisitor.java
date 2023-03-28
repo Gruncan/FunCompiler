@@ -11,8 +11,14 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
+import org.antlr.v4.runtime.tree.ParseTree;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * A visitor for contextual analysis of Fun.
@@ -32,6 +38,8 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
     private final CommonTokenStream tokens;
     private final SymbolTable<Type> typeTable = new SymbolTable<>();
     private int errorCount = 0;
+    private final List<String> map = new ArrayList<>();
+
 
     public FunCheckerVisitor(CommonTokenStream tokens) {
         this.tokens = tokens;
@@ -351,12 +359,46 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
     @Override
     public Type visitSwitch(FunParser.SwitchContext ctx) {
         Type t = super.visit(ctx.expr());
+        Set<Integer> guards = new HashSet<>();
         for (FunParser.Sw_caseContext sw_case : ctx.sw_case()) {
             Type type = super.visit(sw_case);
             this.checkType(t, type, ctx);
+
+
+            int length = guards.size();
+            Set<Integer> toAdd = this.checkSwitchOverlap(sw_case);
+            int addLength = toAdd.size();
+            guards.addAll(toAdd);
+
+            boolean hasOverlapped = length + addLength != guards.size();
+            if (hasOverlapped)
+                this.reportError(String.format("Switch case guard (%s) has already been used!", toAdd), sw_case);
         }
         super.visit(ctx.sw_default());
         return null;
+    }
+
+
+    private Set<Integer> checkSwitchOverlap(FunParser.Sw_caseContext sw_case) {
+        Set<Integer> ints = new HashSet<>();
+        for (ParseTree child : sw_case.children) {
+            if (child instanceof FunParser.RangeContext rangeContext) {
+                // Type has already been checked and verified to be INT
+                String n1 = ((FunParser.NumContext) rangeContext.n1).NUM().toString();
+                String n2 = ((FunParser.NumContext) rangeContext.n2).NUM().toString();
+                int i1 = Integer.parseInt(n1);
+                int i2 = Integer.parseInt(n2);
+                // Create list of ints from i1-i2
+                ints = IntStream.rangeClosed(i1, i2)
+                        .boxed().collect(Collectors.toSet());
+                break;
+            } else if (child instanceof FunParser.NumContext numContext) {
+                String n = numContext.NUM().toString();
+                ints.add(Integer.parseInt(n));
+                break;
+            }
+        }
+        return ints;
     }
 
     @Override

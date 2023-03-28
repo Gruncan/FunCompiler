@@ -1,20 +1,14 @@
 
 proc main ():
-    int n = 1
+    int n = 2
     int v = 0
     bool c =  true
     switch n:
-        case 1:
-            switch c:
-                case false:
-                    write(0)
-                    v = 3
-                .
-                default:
-                    write(1)
-                    v = 7
-                .
-            .
+        case 1..90:
+            v = 100
+        .
+        case 87:
+            v = 99
         .
         default:
            v = 8
