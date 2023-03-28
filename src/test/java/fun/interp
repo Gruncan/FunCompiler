@@ -1,0 +1,79 @@
+     0: CALL    4
+     4: LOADC   1           # n = 1
+     7: LOADC   0           # v = 0
+    10: LOADC   1           # c = true
+
+    13: LOADL   2
+    16: STOREG  0           # store n in global
+    19: LOADC   1           # load lit 1
+    22: LOADG   0           # case cmp
+    25: CMPEQ
+    26: JUMPF   75          # default n != 1
+    29: LOADL   4           # load c
+    32: STOREG  1           # store c in global
+    35: LOADC   0           # load false
+    38: LOADG   1           # case false cmp
+    41: CMPEQ
+    42: JUMPF   60          # default since c is true
+    60: LOADC   1
+    63: CALL    32767
+1
+    66: LOADC   7           # v  = 7
+    69: STOREL  3
+    72: JUMP    81
+    81: LOADL   3
+    84: CALL    32767
+7
+    87: RETURN  0
+     1: LOADG   1040
+     4: LOADC   1
+     7: LOADC   0
+    10: LOADC   1
+    13: LOADL   2
+    16: STOREG  0
+    19: LOADC   1
+    22: LOADG   0
+    25: CMPEQ
+    26: JUMPF   75
+    29: LOADL   4
+    32: STOREG  1
+    35: LOADC   0
+    38: LOADG   1
+    41: CMPEQ
+    42: JUMPF   60
+    60: LOADC   1
+    63: CALL    32767
+1
+    66: LOADC   7
+    69: STOREL  3
+    72: JUMP    81
+    81: LOADL   3
+    84: CALL    32767
+7
+    87: RETURN  0
+     0: CALL    4
+     4: LOADC   1
+     7: LOADC   0
+    10: LOADC   1
+    13: LOADL   2
+    16: STOREG  0
+    19: LOADC   1
+    22: LOADG   0
+    25: CMPEQ
+    26: JUMPF   75
+    29: LOADL   4
+    32: STOREG  1
+    35: LOADC   0
+    38: LOADG   1
+    41: CMPEQ
+    42: JUMPF   60
+    60: LOADC   1
+    63: CALL    32767
+1
+    66: LOADC   7
+    69: STOREL  3
+    72: JUMP    81
+    81: LOADL   3
+    84: CALL    32767
+7
+    87: RETURN  0

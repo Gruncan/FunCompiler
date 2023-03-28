@@ -261,7 +261,7 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         super.visit(ctx.expr());
 
         int condAddr = this.obj.currentOffset();
-        this.obj.emit12(SVM.JUMPF, 0);
+        this.obj.emit12(SVM.JUMPT, 0);
         super.visit(ctx.seq_com());
 
         this.obj.emit12(SVM.JUMP, startAddr);
@@ -271,52 +271,39 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         return null;
     }
 
+    // EXTENSION
     @Override
     public Void visitRepeat_until(FunParser.Repeat_untilContext ctx) {
-        // Evaluating expression and storing in i
-        super.visit(ctx.sec_expr());
-        String id = "_i"; // Impossible to override other variables since illegal naming
-        this.addrTable.put(id, new Address(this.globalVarAddr++, Address.GLOBAL));
-        Address iAddr = this.addrTable.get(id);
         int startAddr = this.obj.currentOffset();
+        super.visit(ctx.expr());
 
-        this.obj.emit12(SVM.STOREG, iAddr.offset);
-        this.obj.emit12(SVM.LOADC, 0);
-        this.obj.emit12(SVM.LOADG, iAddr.offset);
-
-        this.obj.emit1(SVM.CMPLT);
         int condAddr = this.obj.currentOffset();
-        this.obj.emit12(SVM.JUMPF, 0); // To be patched
-
+        this.obj.emit12(SVM.JUMPT, 0);
         super.visit(ctx.seq_com());
 
-        this.obj.emit12(SVM.LOADG, iAddr.offset);
-        this.obj.emit12(SVM.LOADC, 1);
-        this.obj.emit1(SVM.SUB);
-
         this.obj.emit12(SVM.JUMP, startAddr);
-
         int exitAddr = this.obj.currentOffset();
         this.obj.patch12(condAddr, exitAddr);
 
-        // removes index variable
-        this.addrTable.remove(id);
-
         return null;
     }
+
 
     @Override
     public Void visitSwitch(FunParser.SwitchContext ctx) {
         super.visit(ctx.expr());
-        // TODO Check its not already in use, with things like loop etc
         String id = "_i"; // Impossible to override other variables since illegal naming
-        this.addrTable.put(id, new Address(this.globalVarAddr++, Address.GLOBAL));
+        // Handles nesting of switch statements by saving previous address
+        Address oldAddr = this.addrTable.get(id);
+        this.addrTable.overwritePut(id, new Address(this.localVarAddr++, Address.LOCAL));
         Address iAddr = this.addrTable.get(id);
-        this.obj.emit12(SVM.STOREG, iAddr.offset);
+
+        this.obj.emit12(SVM.STOREL, iAddr.offset);
 
         int[] patches = new int[ctx.sw_case().size()];
         for (int i = 0; i < patches.length; i++) {
             super.visit(ctx.sw_case(i));
+            // 3 bits per instruction cl stores next instruction position, therefore -3 to go to previous instruction
             patches[i] = this.obj.currentOffset() - 3;
         }
         super.visit(ctx.sw_default());
@@ -327,14 +314,14 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
             this.obj.patch12(patchLoc, endAddr);
         }
 
+        this.addrTable.overwritePut(id, oldAddr);
+
+
         return null;
     }
 
     @Override
     public Void visitCase(FunParser.CaseContext ctx) {
-        // TODO handle option or the 2
-
-        // TODO Check its not already in use, with things like loop etc
         String id = "_i"; // Impossible to override other variables since illegal naming
         Address iAddr = this.addrTable.get(id);
 
@@ -344,16 +331,16 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         List<Integer> conditions = new ArrayList<>();
         if (rangeContext == null) {
             super.visit(litContext); // Pushes on to stack
-            this.obj.emit12(SVM.LOADG, iAddr.offset);
+            this.obj.emit12(SVM.LOADL, iAddr.offset);
             this.obj.emit1(SVM.CMPEQ);
         } else {
             super.visit(rangeContext); // Pushes n1-1 then n2+1 to stack
-            this.obj.emit12(SVM.LOADG, iAddr.offset);
+            this.obj.emit12(SVM.LOADL, iAddr.offset);
             this.obj.emit1(SVM.CMPGT);
             conditions.add(this.obj.currentOffset());
             this.obj.emit12(SVM.JUMPF, 0); // to be patched
 
-            this.obj.emit12(SVM.LOADG, iAddr.offset);
+            this.obj.emit12(SVM.LOADL, iAddr.offset);
             this.obj.emit1(SVM.CMPLT);
         }
 
@@ -393,6 +380,7 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         super.visitChildren(ctx);
         return null;
     }
+    // END OF EXTENSION
 
     /**
      * Visit a parse tree produced by the {@code seq}

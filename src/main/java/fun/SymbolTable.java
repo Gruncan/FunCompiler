@@ -48,16 +48,13 @@ public class SymbolTable<T> {
             return false;
     }
 
-    // My code
-    public boolean remove(String id) {
-        T r;
-        if (this.locals != null && this.locals.get(id) != null)
-            r = this.locals.remove(id);
-        else
-            r = this.globals.remove(id);
-
-        return r != null;
+    // EXTENSION
+    // Same as put above but overwrites variable, used for nested switch guard
+    public void overwritePut(String id, T attr) {
+        Map<String, T> scope = (this.locals != null ? this.locals : this.globals);
+        scope.put(id, attr);
     }
+    // END OF EXTENSION
 
     public T get(String id) {
         // Retrieve the attribute corresponding to id in this

@@ -61,7 +61,8 @@ com
 	|	WHILE expr COLON          
 		  seq_com DOT             # while
 
-    |   REPEAT_UNTIL sec_expr COLON
+// EXTENSION
+    |   REPEAT_UNTIL expr COLON
           seq_com DOT             # repeat_until
 
     |   SWITCH expr COLON
@@ -80,6 +81,7 @@ sw_default
        DEFAULT COLON
             seq_com DOT     # default
     ;
+// END OF EXTENSION
 
 seq_com
 	:	com*                      # seq
@@ -97,6 +99,7 @@ sec_expr
 		  ( op=(PLUS | MINUS | TIMES | DIV) e2=sec_expr )?
 	;
 
+// EXTENSION
 lit
     :   FALSE                  # false
     |   TRUE                   # true
@@ -109,6 +112,7 @@ range
 
 prim_expr
     :   lit                    # literal
+// END OF EXTENSION
 	|	ID                     # id
 	|	ID LPAR actual RPAR    # funccall
 	|	NOT prim_expr          # not
@@ -132,10 +136,12 @@ PROC	:	'proc' ;
 RETURN 	:	'return' ;
 TRUE	:	'true' ;
 WHILE	:	'while' ;
+// EXTENSION
 REPEAT_UNTIL : 'repeat-until';
 SWITCH : 'switch';
 CASE : 'case';
 DEFAULT: 'default';
+// END OF EXTENSION
 
 EQ		:	'==' ;
 LT		:	'<' ;

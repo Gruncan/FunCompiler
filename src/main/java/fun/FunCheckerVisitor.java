@@ -339,11 +339,12 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
         return null;
     }
 
+    //EXTENSION
     @Override
     public Type visitRepeat_until(FunParser.Repeat_untilContext ctx) {
-        Type t = super.visit(ctx.sec_expr());
+        Type t = super.visit(ctx.expr());
         super.visit(ctx.seq_com());
-        this.checkType(Type.INT, t, ctx);
+        this.checkType(Type.BOOL, t, ctx);
         return null;
     }
 
@@ -356,7 +357,6 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
         }
         super.visit(ctx.sw_default());
         return null;
-
     }
 
     @Override
@@ -389,6 +389,7 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
     public Type visitLiteral(FunParser.LiteralContext ctx) {
         return super.visitChildren(ctx);
     }
+    // END OF EXTENSION
 
     /**
      * Visit a parse tree produced by the {@code seq}
