@@ -361,7 +361,6 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
             Type type = super.visit(sw_case);
             this.checkType(t, type, ctx);
 
-
             int length = guards.size();
             Set<Integer> toAdd = this.checkSwitchOverlap(sw_case);
             int addLength = toAdd.size();
@@ -384,19 +383,22 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
                 String n2 = ((FunParser.NumContext) rangeContext.n2).NUM().toString();
                 int i1 = Integer.parseInt(n1);
                 int i2 = Integer.parseInt(n2);
-                // Create list of ints from i1-i2
+                // Create set of ints from i1-i2
                 return IntStream.rangeClosed(i1, i2)
                         .boxed().collect(Collectors.toSet());
             } else if (child instanceof FunParser.NumContext numContext) {
                 String n = numContext.NUM().toString();
+                // Return the single number
                 return Collections.singleton(Integer.parseInt(n));
             } else if (child instanceof FunParser.TrueContext trueContext) {
                 String s = trueContext.TRUE().toString();
                 boolean t = Boolean.parseBoolean(s);
+                // Convert bool into int
                 return Collections.singleton(t ? 1 : 0);
             } else if (child instanceof FunParser.FalseContext falseContext) {
                 String s = falseContext.FALSE().toString();
                 boolean t = Boolean.parseBoolean(s);
+                // Convert bool into int
                 return Collections.singleton(t ? 1 : 0);
             }
         }

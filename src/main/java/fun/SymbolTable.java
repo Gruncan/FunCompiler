@@ -51,7 +51,7 @@ public class SymbolTable<T> {
     // EXTENSION
     // Same as put above but overwrites variable, used for nested switch guard
     public void overwritePut(String id, T attr) {
-        Map<String, T> scope = (this.locals != null ? this.locals : this.globals);
+        Map<String, T> scope = this.globals;
         scope.put(id, attr);
     }
     // END OF EXTENSION
