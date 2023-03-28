@@ -13,10 +13,7 @@ import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -380,7 +377,6 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
 
 
     private Set<Integer> checkSwitchOverlap(FunParser.Sw_caseContext sw_case) {
-        Set<Integer> ints = new HashSet<>();
         for (ParseTree child : sw_case.children) {
             if (child instanceof FunParser.RangeContext rangeContext) {
                 // Type has already been checked and verified to be INT
@@ -389,16 +385,22 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
                 int i1 = Integer.parseInt(n1);
                 int i2 = Integer.parseInt(n2);
                 // Create list of ints from i1-i2
-                ints = IntStream.rangeClosed(i1, i2)
+                return IntStream.rangeClosed(i1, i2)
                         .boxed().collect(Collectors.toSet());
-                break;
             } else if (child instanceof FunParser.NumContext numContext) {
                 String n = numContext.NUM().toString();
-                ints.add(Integer.parseInt(n));
-                break;
+                return Collections.singleton(Integer.parseInt(n));
+            } else if (child instanceof FunParser.TrueContext trueContext) {
+                String s = trueContext.TRUE().toString();
+                boolean t = Boolean.parseBoolean(s);
+                return Collections.singleton(t ? 1 : 0);
+            } else if (child instanceof FunParser.FalseContext falseContext) {
+                String s = falseContext.FALSE().toString();
+                boolean t = Boolean.parseBoolean(s);
+                return Collections.singleton(t ? 1 : 0);
             }
         }
-        return ints;
+        return Collections.emptySet();
     }
 
     @Override

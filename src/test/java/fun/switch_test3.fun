@@ -8,6 +8,9 @@ proc main ():
             write(n)
             write(5)
         .
+        case true:
+            v =  10
+        .
         default:
            v = 8
        .
