@@ -303,7 +303,8 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         int[] patches = new int[ctx.sw_case().size()];
         for (int i = 0; i < patches.length; i++) {
             super.visit(ctx.sw_case(i));
-            // 3 bits per instruction cl stores next instruction position, therefore -3 to go to previous instruction
+            // 3 bits per instruction cl stores next instruction position,
+            // therefore -3 to go to previous instruction (the jump to be patched)
             patches[i] = this.obj.currentOffset() - 3;
         }
         super.visit(ctx.sw_default());
@@ -314,6 +315,7 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
             this.obj.patch12(patchLoc, endAddr);
         }
 
+        // Puts previous switch guard back for nested switch statements
         this.addrTable.overwritePut(id, oldAddr);
         this.globalVarAddr--;
 
