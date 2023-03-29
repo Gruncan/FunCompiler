@@ -12,89 +12,82 @@ package fun;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Representation of generic symbol tables.
- * Based on a previous version developed by
- * David Watt and Simon Gay (University of Glasgow).
- *
- * @param <T>
- */
-public class SymbolTable<T> {
+public class SymbolTable<A> {
 
-    // An object of class SymbolTable<A> represents a symbol
-    // table in which identifiers (strings) are associated
-    // with attributes of type A. The symbol table comprises
-    // a global part (which is always enabled) and a local
-    // part (which may be enabled or disabled). Each part is
-    // a set of (String,A) entries in which the strings are
-    // unique.
-    private final Map<String, T> globals;
-    private Map<String, T> locals;
+	// An object of class SymbolTable<A> represents a symbol 
+	// table in which identifiers (strings) are associated 
+	// with attributes of type A. The symbol table comprises 
+	// a global part (which is always enabled) and a local 
+	// part (which may be enabled or disabled). Each part is 
+	// a set of (String,A) entries in which the strings are 
+	// unique.
 
-    public SymbolTable() {
-        this.globals = new HashMap<>();
-        this.locals = null;  // initially disabled
-    }
+	private HashMap<String, A> globals, locals;
 
-    public boolean put(String id, T attr) {
-        // Add (id,attr) to this symbol table, either to the
-        // local part (if enabled) or to the global part
-        // (otherwise). Return true iff id is unique.
-        Map<String, T> scope = (this.locals != null ? this.locals : this.globals);
-        if (scope.get(id) == null) {
-            scope.put(id, attr);
-            return true;
-        } else
-            return false;
-    }
+	public SymbolTable() {
+		globals = new HashMap<String, A>();
+		locals = null;  // initially disabled
+	}
 
-    // EXTENSION
-    // Same as put above but overwrites variable, used for nested switch guard
-    public void overwritePut(String id, T attr) {
-        Map<String, T> scope = this.globals;
-        scope.put(id, attr);
-    }
-    // END OF EXTENSION
+	public boolean put(String id, A attr) {
+		// Add (id,attr) to this symbol table, either to the
+		// local part (if enabled) or to the global part
+		// (otherwise). Return true iff id is unique.
+		HashMap<String, A> scope =
+				(locals != null ? locals : globals);
+		if (scope.get(id) == null) {
+			scope.put(id, attr);
+			return true;
+		} else
+			return false;
+	}
 
-    public T get(String id) {
-        // Retrieve the attribute corresponding to id in this
-        // symbol table. If id occurs in both local and global
-        // parts, prefer the local one. Return the attribute,
-        // or null if id is not found.
-        if (this.locals != null && this.locals.get(id) != null)
-            return this.locals.get(id);
-        else
-            return this.globals.get(id);
-    }
+	// EXTENSION
+	// Same as put above but overwrites variable, used for nested switch guard
+	public void overwritePut(String id, A attr) {
+		Map<String, A> scope = this.globals;
+		scope.put(id, attr);
+	}
+	// END OF EXTENSION
 
-    public T getLocal(String id) {
-        // Retrieve the attribute corresponding to id in the
-        // local part of this symbol table. Return the attribute,
-        // or null if id is not found.
-        if (this.locals != null)
-            return this.locals.get(id);
-        else
-            return null;
-    }
+	public A get(String id) {
+		// Retrieve the attribute corresponding to id in this
+		// symbol table. If id occurs in both local and global
+		// parts, prefer the local one. Return the attribute,
+		// or null if id is not found.
+		if (locals != null && locals.get(id) != null)
+			return locals.get(id);
+		else
+			return globals.get(id);
+	}
 
-    public void enterLocalScope() {
-        // Enable the local part of this symbol table.
-        // Assume that locals == null.
-        this.locals = new HashMap<>();
-    }
+	public A getLocal(String id) {
+		// Retrieve the attribute corresponding to id in the
+		// local part of this symbol table. Return the attribute,
+		// or null if id is not found.
+		if (locals != null)
+			return locals.get(id);
+		else
+			return null;
+	}
 
-    public void exitLocalScope() {
-        // Discard all entries in the local part of this
-        // symbol table, and disable the local part.
-        this.locals = null;
-    }
+	public void enterLocalScope() {
+		// Enable the local part of this symbol table.
+		// Assume that locals == null.
+		locals = new HashMap<String, A>();
+	}
 
-    @Override
-    public String toString() {
-        // Return a textual representation of this symbol table.
-        String s = "Globals: " + this.globals + "\n";
-        if (this.locals != null)
-            s += "Locals: " + this.locals + "\n";
-        return s;
-    }
+	public void exitLocalScope() {
+		// Discard all entries in the local part of this
+		// symbol table, and disable the local part.
+		locals = null;
+	}
+
+	public String toString() {
+		// Return a textual representation of this symbol table.
+		String s = "Globals: " + globals + "\n";
+		if (locals != null)
+			s += "Locals: " + locals + "\n";
+		return s;
+	}
 }

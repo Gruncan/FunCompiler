@@ -4,7 +4,7 @@ proc main ():
     int v = 0
     bool c =  true
     switch n:
-        case 91:
+        case 0..90:
             v = 99
         .
         default:
