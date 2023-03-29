@@ -117,11 +117,6 @@ range
 
 prim_expr
     :   lit                    # literal
-// END OF EXTENSION
-prim_expr
-	:	FALSE                  # false        
-	|	TRUE                   # true
-	|	NUM                    # num
 	|	ID                     # id
 	|	ID LPAR actual_seq? RPAR    # funccall
 	|	NOT prim_expr          # not
