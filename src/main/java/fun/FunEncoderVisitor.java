@@ -293,7 +293,7 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
     public Void visitSwitch(FunParser.SwitchContext ctx) {
         super.visit(ctx.expr());
         String id = "_i"; // Impossible to override other variables since illegal naming
-        // Handles nesting of switch statements by saving previous address
+        // Handles nesting of switch statements by saving previous address if exists
         Address oldAddr = this.addrTable.get(id);
         this.addrTable.overwritePut(id, new Address(this.globalVarAddr++, Address.GLOBAL));
         Address iAddr = this.addrTable.get(id);
@@ -303,7 +303,7 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         int[] patches = new int[ctx.sw_case().size()];
         for (int i = 0; i < patches.length; i++) {
             super.visit(ctx.sw_case(i));
-            // 3 bits per instruction cl stores next instruction position,
+            // 3 bits for jump instruction, cl stores next instruction position,
             // therefore -3 to go to previous instruction (the jump to be patched)
             patches[i] = this.obj.currentOffset() - 3;
         }
@@ -318,8 +318,6 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
         // Puts previous switch guard back for nested switch statements
         this.addrTable.overwritePut(id, oldAddr);
         this.globalVarAddr--;
-
-
         return null;
     }
 

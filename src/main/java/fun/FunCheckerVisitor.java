@@ -356,19 +356,19 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
     @Override
     public Type visitSwitch(FunParser.SwitchContext ctx) {
         Type t = super.visit(ctx.expr());
-        Set<Integer> guards = new HashSet<>();
+        Set<Integer> masterSet = new HashSet<>();
         for (FunParser.Sw_caseContext sw_case : ctx.sw_case()) {
             Type type = super.visit(sw_case);
             this.checkType(t, type, ctx);
 
-            int length = guards.size();
-            Set<Integer> toAdd = this.checkSwitchOverlap(sw_case);
-            int addLength = toAdd.size();
-            guards.addAll(toAdd);
+            int currentLength = masterSet.size();
+            Set<Integer> toAddSet = this.checkSwitchOverlap(sw_case);
+            int toAddLength = toAddSet.size();
+            masterSet.addAll(toAddSet);
 
-            boolean hasOverlapped = length + addLength != guards.size();
+            boolean hasOverlapped = (currentLength + toAddLength) != masterSet.size();
             if (hasOverlapped)
-                this.reportError(String.format("Switch case guard (%s) has already been used!", toAdd), sw_case);
+                this.reportError(String.format("Switch case guard (%s) has already been used!", toAddSet), sw_case);
         }
         super.visit(ctx.sw_default());
         return null;
@@ -413,7 +413,6 @@ public class FunCheckerVisitor extends AbstractParseTreeVisitor<Type> implements
             return super.visit(lit);
         else
             return super.visit(range);
-
     }
 
     @Override
