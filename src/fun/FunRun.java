@@ -9,13 +9,12 @@
 
 package fun;
 
-import ast.FunLexer;
-import ast.FunParser;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.*;
+import java.util.*;
+import java.io.*;
 
-import java.io.PrintStream;
+import ast.*;
 
 public class FunRun {
 
@@ -24,10 +23,10 @@ public class FunRun {
 	private static PrintStream out = System.out;
 
 	public static void main(String[] args) {
-		// Compile a Fun source program to SVM code,
-		// then interpret it if it compiles successfully.
-		// The source file name must be given as the
-		// first program argument.
+	// Compile a Fun source program to SVM code, 
+	// then interpret it if it compiles successfully.
+	// The source file name must be given as the 
+	// first program argument.
 		try {
 			if (args.length == 0)
 				throw new FunException();
@@ -41,42 +40,44 @@ public class FunRun {
 		}
 	}
 
-	private static SVM compile(String filename) throws Exception {
-		// Compile a Fun source program to SVM code.
+	private static SVM compile (String filename) throws Exception {
+	// Compile a Fun source program to SVM code.
 		FunLexer lexer = new FunLexer(
 				CharStreams.fromFileName(filename));
-		CommonTokenStream tokens =
-				new CommonTokenStream(lexer);
+		CommonTokenStream tokens = 
+			new CommonTokenStream(lexer);
 		ParseTree tree = syntacticAnalyse(tokens);
-		contextualAnalyse(tree, tokens);
+		contextualAnalyse(tree,tokens);
 		SVM objprog = codeGenerate(tree);
 		return objprog;
 	}
 
-	private static ParseTree syntacticAnalyse(CommonTokenStream tokens)
+	private static ParseTree syntacticAnalyse
+			(CommonTokenStream tokens)
 			throws Exception {
-		// Perform syntactic analysis of a Fun source program.
-		// Print any error messages.
-		// Return a syntax tree representation of the Fun program.
+	// Perform syntactic analysis of a Fun source program.
+	// Print any error messages.
+	// Return an AST representation of the Fun program.
 		out.println();
 		out.println("Syntactic analysis ...");
 		FunParser parser = new FunParser(tokens);
-		ParseTree tree = parser.program();
+	        ParseTree ast = parser.program();
 		int errors = parser.getNumberOfSyntaxErrors();
 		out.println(errors + " syntactic errors");
 		if (errors > 0)
 			throw new FunException();
-		return tree;
+		return ast;
 	}
 
-	private static void contextualAnalyse(ParseTree tree, CommonTokenStream tokens)
+    private static void contextualAnalyse (ParseTree ast, CommonTokenStream tokens)
 			throws Exception {
-		// Perform contextual analysis of a Fun program represented by a syntax tree.
-		// Print any error messages.
+	// Perform contextual analysis of a Fun program, 
+	// represented by an AST.
+	// Print any error messages.
 		out.println("Contextual analysis ...");
 		FunCheckerVisitor checker =
-				new FunCheckerVisitor(tokens);
-		checker.visit(tree);
+		   new FunCheckerVisitor(tokens);
+		checker.visit(ast);
 		int errors = checker.getNumberOfContextualErrors();
 		out.println(errors + " scope/type errors");
 		out.println();
@@ -84,15 +85,15 @@ public class FunRun {
 			throw new FunException();
 	}
 
-	private static SVM codeGenerate(ParseTree tree)
-			throws Exception {
-		// Perform code generation of a Fun program,
-		// represented by a syntax tree, emitting SVM code.
-		// Also print the object code.
+	private static SVM codeGenerate (ParseTree ast)
+			throws Exception  {
+	// Perform code generation of a Fun program, 
+	// represented by an AST, emitting SVM code.
+	// Also print the object code.
 		out.println("Code generation ...");
 		FunEncoderVisitor encoder =
-				new FunEncoderVisitor();
-		encoder.visit(tree);
+		   new FunEncoderVisitor();
+		encoder.visit(ast);
 		SVM objectprog = encoder.getSVM();
 		out.println("Object code:");
 		out.println(objectprog.showCode());
