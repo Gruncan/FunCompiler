@@ -12,9 +12,6 @@ proc main ():
         case 122:
             v = 68
         .
-        case false:
-            v = 99
-        .
         default:
            v = 8
        .

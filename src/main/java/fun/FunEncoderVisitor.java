@@ -272,6 +272,15 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
     }
 
     // EXTENSION
+    /*
+     *               CODE TEMPLATE FOR REPEAT-UNTIL
+     *                                   # start address
+     * LOADC expr
+     * JUMPT end                         # jump to end if expression is true
+     * <command body of repeat until>
+     * JUMP start                        # loop back to start
+     *                                   # end address
+     */
     @Override
     public Void visitRepeat_until(FunParser.Repeat_untilContext ctx) {
         int startAddr = this.obj.currentOffset();
@@ -289,6 +298,26 @@ public class FunEncoderVisitor extends AbstractParseTreeVisitor<Void> implements
     }
 
 
+    /*
+     *               CODE TEMPLATE FOR SWITCH
+     *  LOADC  expr
+     *  STOREG expr                      # store the expr into globals
+     *
+     *                                   # case #1
+     *  LOADC literal                    # load the case literal
+     *  LOADG expr                       # load the expr back into the stack
+     *  CMPEQ                            # check if equal
+     *  JUMPF  nxt                       # jump to next case/default
+     *  <command body of case>
+     *  JUMP   end                       # jump to end of switch
+     *                                   # next address
+     *  <other cases matching the above>
+     *                                   # next address
+     *                                   # default
+     *  <command body of default>
+     *                                   # end address
+     *
+     */
     @Override
     public Void visitSwitch(FunParser.SwitchContext ctx) {
         super.visit(ctx.expr());
