@@ -1,6 +1,6 @@
 
 proc main ():
-    bool n = false
+    int n = 9
     int v = 0
     repeat-until v > n:
         v =  v + 1

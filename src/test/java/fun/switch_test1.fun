@@ -16,6 +16,5 @@ proc main ():
            v = 8
        .
     .
-
    write(v)
 .
