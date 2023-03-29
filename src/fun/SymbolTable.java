@@ -10,6 +10,7 @@
 package fun;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import ast.*;
 
